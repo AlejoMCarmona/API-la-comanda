@@ -1,0 +1,55 @@
+<?php
+
+require_once './middlewares/Validadores.php';
+require_once './models/Producto.php';
+require_once './interfaces/IApiUsable.php';
+
+class ProductoController implements IApiUsable {
+
+    public function CargarUno($request, $response, $args) {
+        $parametros = $request -> getParsedBody();
+
+        if (Validadores::ValidarParametros($parametros, [ "nombre", "tipo", "precio", "tiempoPreparacion" ])) { 
+            $producto = new Producto($parametros['nombre'], $parametros['tipo'], $parametros['precio'], $parametros['tiempoPreparacion']);
+            $resultado = $producto -> CrearProducto();
+
+            if (is_numeric($resultado)) {
+                $payload = json_encode(array("Resultado" => "Se ha creado con éxito un producto con el ID {$resultado}"));
+            } else {
+                $payload = json_encode(array("ERROR" => "Hubo un error durante la incorporación del nuevo producto a la carta"));
+            }
+        } else {
+            $payload = json_encode(array("ERROR" => "Los parámetros obligatorios para agregar un nuevo producto a la carta son: nombre, tipo, precio y tiempoPreparacion"));
+        }
+
+        $response -> getBody() -> write($payload);
+        return $response -> withHeader('Content-Type', 'application/json');
+    }
+
+    public function TraerTodos($request, $response, $args) {
+        $lista = Producto::ObtenerTodosLosProductos();
+
+        if (is_array($lista)) {
+            $payload = json_encode(array("Lista" => $lista));
+        } else {
+            $payload = json_encode(array("ERROR" => "Hubo un error al obtener todos los productos"));
+        }
+
+        $response -> getBody() -> write($payload);
+        return $response->withHeader('Content-Type', 'application/json');
+    }
+
+    public function TraerUno($request, $response, $args) {
+        return;
+    }
+
+	public function BorrarUno($request, $response, $args) {
+        return;
+    }
+
+	public function ModificarUno($request, $response, $args) {
+        return;
+    }
+}
+
+?>
