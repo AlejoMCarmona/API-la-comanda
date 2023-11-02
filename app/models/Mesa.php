@@ -43,6 +43,30 @@ class Mesa {
         }
         return $retorno;
     }
+
+    public static function ObtenerMesa($id) {
+        $retorno = false;
+        $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
+        $consulta = $objetoAccesoDatos -> PrepararConsulta("SELECT * FROM mesas WHERE id = :id");
+        $consulta -> bindParam(':id', $id);
+        $resultado = $consulta -> execute();
+        if ($resultado) {
+            $retorno = $consulta -> fetchObject('Mesa');
+        }
+        return $retorno;
+    }
+
+    public function CambiarEstado($nuevoEstado) {
+        $retorno = false;
+        if ($this -> estado != $nuevoEstado) {
+            $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
+            $consulta = $objetoAccesoDatos -> PrepararConsulta("UPDATE mesas SET estado = :nuevoEstado WHERE id = :id");
+            $consulta -> bindParam(':nuevoEstado', $nuevoEstado);
+            $consulta -> bindParam(':id', $this -> id);
+            $retorno = $consulta -> execute();
+        }
+        return $retorno;
+    }
 }
 
 ?>

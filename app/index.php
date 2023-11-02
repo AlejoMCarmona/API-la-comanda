@@ -10,6 +10,7 @@ require __DIR__ . '/../vendor/autoload.php';
 require_once './controllers/MesaController.php';
 require_once './controllers/EmpleadoController.php';
 require_once './controllers/ProductoController.php';
+require_once './controllers/PedidoController.php';
 #endregion
 
 // Cargar .env
@@ -41,6 +42,12 @@ $app -> group('/empleados', function (RouteCollectorProxy $group) {
 $app -> group('/productos', function (RouteCollectorProxy $group) {
     $group -> post('[/]', \ProductoController::class . ':CargarUno');
     $group -> get('[/]', \ProductoController::class . ':TraerTodos');
+});
+#endregion
+#region Pedidos
+$app -> group('/pedidos', function (RouteCollectorProxy $group) {
+    $group -> post('[/]', \PedidoController::class . ':CargarUno');
+    $group -> get('[/]', \PedidoController::class . ':TraerTodos');
 });
 #endregion
 #endregion

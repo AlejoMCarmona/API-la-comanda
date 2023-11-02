@@ -49,10 +49,22 @@ class Producto {
     public static function ObtenerTodosLosProductos() {
         $retorno = false;
         $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
-        $consulta = $objetoAccesoDatos->PrepararConsulta("SELECT * FROM Productos");
+        $consulta = $objetoAccesoDatos -> PrepararConsulta("SELECT * FROM Productos");
         $resultado = $consulta->execute();
         if ($resultado) {
             $retorno = $consulta->fetchAll(PDO::FETCH_CLASS, 'Producto');
+        }
+        return $retorno;
+    }
+
+    public static function ObtenerProducto($id) {
+        $retorno = false;
+        $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
+        $consulta = $objetoAccesoDatos -> PrepararConsulta("SELECT * FROM productos WHERE id = :id");
+        $consulta -> bindParam(':id', $id);
+        $resultado = $consulta -> execute();
+        if ($resultado) {
+            $retorno = $consulta -> fetchObject('Producto');
         }
         return $retorno;
     }

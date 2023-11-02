@@ -61,6 +61,18 @@ class Empleado {
         }
         return $retorno;
     }
+
+    public static function ObtenerEmpleado($id) {
+        $retorno = false;
+        $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
+        $consulta = $objetoAccesoDatos -> PrepararConsulta("SELECT * FROM empleados WHERE id = :id");
+        $consulta -> bindParam(':id', $id);
+        $resultado = $consulta -> execute();
+        if ($resultado) {
+            $retorno = $consulta -> fetchObject('Empleado');
+        }
+        return $retorno;
+    }
 }
 
 ?>
