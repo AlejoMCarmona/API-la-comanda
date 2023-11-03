@@ -11,7 +11,7 @@ class PedidoController implements IApiUsable {
 
         if (Validadores::ValidarParametros($parametros, [ "idMesa", "idProducto", "idEmpleado" ])) {
             $mesa = Mesa::ObtenerMesa($parametros["idMesa"]);
-            if ($mesa != false && Producto::ObtenerProducto($parametros["idProducto"]) != false && Empleado::ObtenerEmpleado($parametros["idEmpleado"]) != false) {
+            if ($mesa != false && Producto::ObtenerProducto($parametros["idProducto"]) != false && Usuario::ObtenerUsuario($parametros["idEmpleado"]) != false) {
                 $numeroIdentificacion = "";
                 if ($mesa -> estado != "Cerrada") {
                     $numeroIdentificacion = Pedido::ObtenerUltimoPedidoPorMesa($parametros['idMesa']) -> numeroIdentificacion;

@@ -2,11 +2,13 @@
 
 require_once './db/AccesoDatos.php';
 
-class Empleado {
+class Usuario {
     public $id;
     public $nombre;
     public $apellido;
     public $dni;
+    public $email;
+    public $clave;
     public $puesto;
     public $sector;
     public $fechaAlta;
@@ -20,27 +22,32 @@ class Empleado {
         }
     }
 
-    public function __construct7($id, $nombre, $apellido, $dni, $puesto, $sector, $fechaAlta) {
+    public function __construct9($id, $nombre, $apellido, $dni, $email, $clave, $puesto, $sector, $fechaAlta) {
         $this -> id = $id;
         $this -> nombre = $nombre;
         $this -> apellido = $apellido;
         $this -> dni = $dni;
+        $this -> email = $email;
+        $this -> clave = $clave;
         $this -> puesto = $puesto;
         $this -> sector = $sector;
         $this -> fechaAlta = $fechaAlta;
     }
 
-    public function __construct5($nombre, $apellido, $dni, $puesto, $sector) {
-        $this -> __construct7(0, $nombre, $apellido, $dni, $puesto, $sector,"");
+    public function __construct7($nombre, $apellido, $dni, $email, $clave, $puesto, $sector) {
+        $this -> __construct9(0, $nombre, $apellido, $dni, $email, $clave, $puesto, $sector, "");
     }
 
-    public function CrearEmpleado() {
+    public function CrearUsuario() {
         $retorno = false;
         $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
-        $consulta = $objetoAccesoDatos -> PrepararConsulta("INSERT INTO Empleados (nombre, apellido, dni, puesto, sector) VALUES (:nombre, :apellido, :dni, :puesto, :sector)");
+        $consulta = $objetoAccesoDatos -> PrepararConsulta("INSERT INTO usuarios (nombre, apellido, dni, email, clave, puesto, sector) VALUES (:nombre, :apellido, :dni, :email, :clave, :puesto, :sector)");
         $consulta -> bindParam(':nombre', $this -> nombre);
         $consulta -> bindParam(':apellido', $this -> apellido);
         $consulta -> bindParam(':dni', $this -> dni);
+        $consulta -> bindParam(':email', $this -> email);
+        $claveHash = password_hash($this -> clave, PASSWORD_DEFAULT);
+        $consulta -> bindParam(':clave', $claveHash);
         $consulta -> bindParam(':puesto', $this -> puesto);
         $consulta -> bindParam(':sector', $this -> sector);
 
@@ -51,25 +58,25 @@ class Empleado {
         return $retorno;
     }
 
-    public static function ObtenerTodosLosEmpleados() {
+    public static function ObtenerTodosLosUsuarios() {
         $retorno = false;
         $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
-        $consulta = $objetoAccesoDatos -> PrepararConsulta("SELECT * FROM Empleados");
+        $consulta = $objetoAccesoDatos -> PrepararConsulta("SELECT * FROM usuarios");
         $resultado = $consulta -> execute();
         if ($resultado) {
-            $retorno = $consulta -> fetchAll(PDO::FETCH_CLASS, 'Empleado');
+            $retorno = $consulta -> fetchAll(PDO::FETCH_CLASS, 'Usuario');
         }
         return $retorno;
     }
 
-    public static function ObtenerEmpleado($id) {
+    public static function ObtenerUsuario($id) {
         $retorno = false;
         $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
-        $consulta = $objetoAccesoDatos -> PrepararConsulta("SELECT * FROM empleados WHERE id = :id");
+        $consulta = $objetoAccesoDatos -> PrepararConsulta("SELECT * FROM usuarios WHERE id = :id");
         $consulta -> bindParam(':id', $id);
         $resultado = $consulta -> execute();
         if ($resultado) {
-            $retorno = $consulta -> fetchObject('Empleado');
+            $retorno = $consulta -> fetchObject('Usuario');
         }
         return $retorno;
     }

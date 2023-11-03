@@ -8,7 +8,7 @@ require __DIR__ . '/../vendor/autoload.php';
 
 #region Controladores
 require_once './controllers/MesaController.php';
-require_once './controllers/EmpleadoController.php';
+require_once './controllers/UsuarioController.php';
 require_once './controllers/ProductoController.php';
 require_once './controllers/PedidoController.php';
 #endregion
@@ -32,10 +32,10 @@ $app -> group('/mesas', function (RouteCollectorProxy $group) {
     $group -> get('[/]', \MesaController::class . ':TraerTodos');
 });
 #endregion
-#region Empleados
-$app -> group('/empleados', function (RouteCollectorProxy $group) {
-    $group -> post('[/]', \EmpleadoController::class . ':CargarUno');
-    $group -> get('[/]', \EmpleadoController::class . ':TraerTodos');
+#region Usuarios
+$app -> group('/usuarios', function (RouteCollectorProxy $group) {
+    $group -> post('[/]', \UsuarioController::class . ':CargarUno');
+    $group -> get('[/]', \UsuarioController::class . ':TraerTodos');
 });
 #endregion
 #region Productos
