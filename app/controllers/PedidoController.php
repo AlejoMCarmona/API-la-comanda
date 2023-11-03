@@ -11,8 +11,12 @@ class PedidoController implements IApiUsable {
 
         if (Validadores::ValidarParametros($parametros, [ "idMesa", "idProducto", "idEmpleado" ])) {
             $mesa = Mesa::ObtenerMesa($parametros["idMesa"]);
-            if (get_class($mesa) == "Mesa" && get_class(Producto::ObtenerProducto($parametros["idProducto"])) == "Producto" && get_class(Empleado::ObtenerEmpleado($parametros["idEmpleado"])) == "Empleado") {
-                $pedido = new Pedido($parametros['idMesa'], $parametros['idProducto'], $parametros['idEmpleado'], "F00000"); // Hacer identificador de 6 cifras
+            if ($mesa != false && Producto::ObtenerProducto($parametros["idProducto"]) != false && Empleado::ObtenerEmpleado($parametros["idEmpleado"]) != false) {
+                $numeroIdentificacion = "";
+                if ($mesa -> estado != "Cerrada") {
+                    $numeroIdentificacion = Pedido::ObtenerUltimoPedidoPorMesa($parametros['idMesa']) -> numeroIdentificacion;
+                }
+                $pedido = new Pedido($parametros['idMesa'], $parametros['idProducto'], $parametros['idEmpleado'], $numeroIdentificacion);
                 $resultado = $pedido -> CrearPedido();
                 $mesa -> CambiarEstado("Con cliente esperando pedido");
 
@@ -21,6 +25,8 @@ class PedidoController implements IApiUsable {
                 } else {
                     $payload = json_encode(array("ERROR" => "Hubo un error durante la creación del pedido"));
                 }
+            } else {
+                $payload = json_encode(array("ERROR" => "Tanto la mesa seleccionada, como el producto y el empleado, deben existir para realizar un pedido"));
             }
         } else {
             $payload = json_encode(array("ERROR" => "Los parámetros obligatorios para cargar un nuevo empleado son: nombre, idMesa, idProducto y idEmpleado"));
