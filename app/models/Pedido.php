@@ -17,18 +17,19 @@ class Pedido {
         }
     }
 
-    public function __construct6($id, $idMesa, $idProducto, $idEmpleado, $numeroIdentificacion, $fecha) {
+    public function __construct7($id, $idMesa, $idProducto, $idEmpleado, $numeroIdentificacion, $estado, $fecha) {
         $this -> id = $id;
         $this -> idMesa = $idMesa;
         $this -> idProducto = $idProducto;
         $this -> idEmpleado = $idEmpleado;
         $this -> numeroIdentificacion = $numeroIdentificacion;
+        $this -> estado = $estado;
         $this -> fecha = $fecha;
     }
 
     public function __construct4($idMesa, $idProducto, $idEmpleado, $numeroIdentificacion) {
-        if ($numeroIdentificacion == "") $numeroIdentificacion = self::GenerarNumeroAlfanumericoIdentificacion(6);
-        $this -> __construct6(0, $idMesa, $idProducto, $idEmpleado, $numeroIdentificacion, "");
+        if ($numeroIdentificacion == "") $numeroIdentificacion = self::GenerarNumeroAlfanumericoIdentificacion(5);
+        $this -> __construct7(0, $idMesa, $idProducto, $idEmpleado, $numeroIdentificacion, "", "");
     }
 
     public function CrearPedido() {
@@ -81,20 +82,31 @@ class Pedido {
         }
         return $retorno;
     }
-    
-    private static function GenerarNumeroAlfanumericoIdentificacion($longitud) {
-        $caracteres = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        $numeroIdentificacion = '';
-        
-        do {
-            for ($i = 0; $i < $longitud; $i++) {
-                $indiceRandom = mt_rand(0, strlen($caracteres) - 1);
-                $numeroIdentificacion .= $caracteres[$indiceRandom];
+
+    public static function ObtenerTiempoRestantePorNumeroIdentificacion($numeroIdentificacion) {
+        $retorno = false;
+        $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
+        $consultaTiempo = $objetoAccesoDatos -> PrepararConsulta("SELECT MIN(pe.fecha) as fechaInicial, MAX(pr.tiempoPreparacion)/60 as tiempoPreparacion FROM pedidos AS pe INNER JOIN productos as pr ON pe.idProducto = pr.id WHERE numeroIdentificacion = :numeroIdentificacion");
+        $consultaTiempo -> bindParam(':numeroIdentificacion', $numeroIdentificacion);
+        $resultadoTiempo = $consultaTiempo -> execute();
+        if ($resultadoTiempo) {
+            $retornoConsulta = $consultaTiempo -> fetchObject();
+            $fechaInicial = $retornoConsulta -> fechaInicial;
+            $tiempoPreparacion = (int)($retornoConsulta -> tiempoPreparacion);
+            // Manejo de fechas
+            $fechaInicio = new DateTime($fechaInicial);
+            $fechaDeFinalizacion = $fechaInicio -> modify("+{$tiempoPreparacion} minutes");
+            $fechaActual = new DateTime();
+            if ($fechaActual > $fechaDeFinalizacion) {
+                $retorno = -1;
+            } else {
+                $retorno = 1;
             }
-            $posiblePedidoExistente = self::ObtenerPedidosPorNumeroIdentificacion($numeroIdentificacion);
-        } while ($posiblePedidoExistente != false);
-        
-        return $numeroIdentificacion;
+            $diferencia = date_diff($fechaActual, $fechaDeFinalizacion);
+            $minutos = ($diferencia -> days * 24 * 60) + ($diferencia -> h * 60) + $diferencia -> i;
+            $retorno *= $minutos;
+        }
+        return $retorno;
     }
 }
 

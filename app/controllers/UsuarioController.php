@@ -50,6 +50,23 @@ class UsuarioController implements IApiUsable {
 	public function ModificarUno($request, $response, $args) {
         return;
     }
+
+    public function IniciarSesion($request, $response, $args) {
+        $parametros = $request -> getParsedBody();
+
+        if (Validadores::ValidarParametros($parametros, [ "email", "clave" ])) {
+            $resultado = Usuario::IniciarSesion($parametros["email"], $parametros["clave"]);
+
+            if (is_string($resultado)) {
+                $payload = json_encode(array("Resultado" => $resultado));
+            } else {
+                $payload = json_encode(array("ERROR" => "Hubo un error al intentar iniciar sesion"));
+            }
+        }
+
+        $response -> getBody() -> write($payload);
+        return $response->withHeader('Content-Type', 'application/json');
+    }
 }
 
 ?>

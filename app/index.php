@@ -35,6 +35,7 @@ $app -> group('/mesas', function (RouteCollectorProxy $group) {
 #region Usuarios
 $app -> group('/usuarios', function (RouteCollectorProxy $group) {
     $group -> post('[/]', \UsuarioController::class . ':CargarUno');
+    $group -> post('/login', \UsuarioController::class . ':IniciarSesion');
     $group -> get('[/]', \UsuarioController::class . ':TraerTodos');
 });
 #endregion
@@ -45,9 +46,11 @@ $app -> group('/productos', function (RouteCollectorProxy $group) {
 });
 #endregion
 #region Pedidos
-$app -> group('/pedidos', function (RouteCollectorProxy $group) {
-    $group -> post('[/]', \PedidoController::class . ':CargarUno');
+$app ->group('/pedidos', function (RouteCollectorProxy $group) {
     $group -> get('[/]', \PedidoController::class . ':TraerTodos');
+    $group -> get('/{numeroIdentificacion}', \PedidoController::class . ':TraerPorNumeroIdentificacion');
+    $group -> get('/tiempoRestante/{numeroIdentificacion}', \PedidoController::class . ':TraerTiempoEstimadoPedido');
+    $group -> post('[/]', \PedidoController::class . ':CargarUno');
 });
 #endregion
 #endregion

@@ -9,6 +9,7 @@ class Usuario {
     public $dni;
     public $email;
     public $clave;
+    public $estado;
     public $puesto;
     public $sector;
     public $fechaAlta;
@@ -22,20 +23,21 @@ class Usuario {
         }
     }
 
-    public function __construct9($id, $nombre, $apellido, $dni, $email, $clave, $puesto, $sector, $fechaAlta) {
+    public function __construct10($id, $nombre, $apellido, $dni, $email, $clave, $estado, $puesto, $sector, $fechaAlta) {
         $this -> id = $id;
         $this -> nombre = $nombre;
         $this -> apellido = $apellido;
         $this -> dni = $dni;
         $this -> email = $email;
         $this -> clave = $clave;
+        $this -> estado = $estado;
         $this -> puesto = $puesto;
         $this -> sector = $sector;
         $this -> fechaAlta = $fechaAlta;
     }
 
     public function __construct7($nombre, $apellido, $dni, $email, $clave, $puesto, $sector) {
-        $this -> __construct9(0, $nombre, $apellido, $dni, $email, $clave, $puesto, $sector, "");
+        $this -> __construct10(0, $nombre, $apellido, $dni, $email, $clave, "", $puesto, $sector, "");
     }
 
     public function CrearUsuario() {
@@ -75,8 +77,29 @@ class Usuario {
         $consulta = $objetoAccesoDatos -> PrepararConsulta("SELECT * FROM usuarios WHERE id = :id");
         $consulta -> bindParam(':id', $id);
         $resultado = $consulta -> execute();
-        if ($resultado) {
+        if ($resultado && $consulta -> rowCount() > 0) {
             $retorno = $consulta -> fetchObject('Usuario');
+        }
+        return $retorno;
+    }
+
+    
+    public static function IniciarSesion($email, $clave) {
+        $retorno = false;
+        $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
+        $consulta = $objetoAccesoDatos -> PrepararConsulta("SELECT * FROM usuarios WHERE email = :email");
+        $consulta -> bindParam(':email', $email);
+        $resultado = $consulta -> execute();
+
+        if ($resultado && $consulta -> rowCount() > 0) {
+            $usuario = $consulta -> fetchObject('Usuario');
+            if (password_verify($clave, $usuario -> clave)) {
+                $retorno = "Inicio sesión correcto";
+            } else {
+                $retorno = "La contraseña es incorrecta";
+            }
+        } else {
+            $retorno = "El email no se encuentra registrado";
         }
         return $retorno;
     }
