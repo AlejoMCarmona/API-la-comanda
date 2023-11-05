@@ -50,6 +50,7 @@ $app ->group('/pedidos', function (RouteCollectorProxy $group) {
     $group -> get('[/]', \PedidoController::class . ':TraerTodos');
     $group -> get('/{numeroIdentificacion}', \PedidoController::class . ':TraerPorNumeroIdentificacion');
     $group -> get('/tiempoRestante/{numeroIdentificacion}', \PedidoController::class . ':TraerTiempoEstimadoPedido');
+    $group -> get('/sector/{sector}', \PedidoController::class . ':TraerPedidosPorSector');
     $group -> post('[/]', \PedidoController::class . ':CargarUno');
 });
 #endregion

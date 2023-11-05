@@ -84,6 +84,24 @@ class Pedido {
         return $retorno;
     }
 
+    public static function ObtenerPedidosPorSector($sector, $traerPendientes = true) {
+        $retorno = false;
+        $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
+        $query = "";
+        if ($traerPendientes) {
+            $query = "SELECT pe.idMesa AS mesa, pr.nombre AS nombreProducto, pe.fecha AS fechaPedido, pr.tiempoPreparacion / 60 AS minutosPreparacion FROM pedidos AS pe INNER JOIN productos AS pr ON pe.idProducto = pr.id WHERE pr.sector = :sector AND pe.estado = 'pendiente'";
+        } else {
+            $query = "SELECT pe.idMesa AS mesa, pr.nombre AS nombreProducto, pe.fecha AS fechaPedido, pr.tiempoPreparacion / 60 AS minutosPreparacion FROM pedidos AS pe INNER JOIN productos AS pr ON pe.idProducto = pr.id WHERE pr.sector = :sector";
+        }
+        $consulta = $objetoAccesoDatos -> PrepararConsulta($query);
+        $consulta -> bindParam(':sector', $sector);
+        $resultado = $consulta -> execute();
+        if ($resultado) {
+            $retorno = $consulta -> fetchAll(PDO::FETCH_OBJ);
+        }
+        return $retorno;
+    }
+
     public static function ObtenerTiempoRestantePorNumeroIdentificacion($numeroIdentificacion) {
         $retorno = false;
         $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();

@@ -74,8 +74,6 @@ class PedidoController implements IApiUsable {
     }
 
     public function TraerTiempoEstimadoPedido($request, $response, $args) {
-        $parametros = $request -> getParsedBody();
-
         if (Validadores::ValidarParametros($args, [ "numeroIdentificacion" ])) {
             $tiempo = Pedido::ObtenerTiempoRestantePorNumeroIdentificacion($args["numeroIdentificacion"]);
 
@@ -93,6 +91,23 @@ class PedidoController implements IApiUsable {
             $payload = json_encode(array("ERROR" => "El parámetro 'numeroIdentificacion' es obligatorio para traer el tiempo de pedido"));
         }
 
+        $response -> getBody() -> write($payload);
+        return $response->withHeader('Content-Type', 'application/json');
+    }
+
+    public function TraerPedidosPorSector($request, $response, $args) {
+        if (Validadores::ValidarParametros($args, [ "sector" ])) {
+            $lista = Pedido::ObtenerPedidosPorSector($args["sector"]);
+
+            if (is_array($lista)) {
+                $payload = json_encode(array("Lista" => $lista));
+            } else {
+                $payload = json_encode(array("ERROR" => "Hubo un error al obtener todos los productos"));
+            }
+        } else {
+            $payload = json_encode(array("ERROR" => "El parámetro 'sector' es obligatorio para traer los pedidos por sector"));
+        }
+        
         $response -> getBody() -> write($payload);
         return $response->withHeader('Content-Type', 'application/json');
     }
