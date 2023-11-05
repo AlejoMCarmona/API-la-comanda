@@ -37,6 +37,7 @@ $app -> group('/usuarios', function (RouteCollectorProxy $group) {
     $group -> post('[/]', \UsuarioController::class . ':CargarUno');
     $group -> post('/login', \UsuarioController::class . ':IniciarSesion');
     $group -> get('[/]', \UsuarioController::class . ':TraerTodos');
+    $group -> get('/puesto/{puesto}', \UsuarioController::class . ':TraerPorPuesto');
 });
 #endregion
 #region Productos

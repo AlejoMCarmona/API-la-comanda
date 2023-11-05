@@ -93,6 +93,17 @@ class Usuario {
         return $retorno;
     }
 
+    public static function ObtenerUsuariosPorPuesto($puesto) {
+        $retorno = false;
+        $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
+        $consulta = $objetoAccesoDatos -> PrepararConsulta("SELECT * FROM usuarios WHERE puesto = :puesto");
+        $consulta -> bindParam(':puesto', $puesto);
+        $resultado = $consulta -> execute();
+        if ($resultado && $consulta -> rowCount() > 0) {
+            $retorno = $consulta -> fetchAll(PDO::FETCH_CLASS, 'Usuario');
+        }
+        return $retorno;
+    }
     
     public static function IniciarSesion($email, $clave) {
         $retorno = false;

@@ -50,6 +50,23 @@ class UsuarioController implements IApiUsable {
         return $response->withHeader('Content-Type', 'application/json');
     }
 
+    public function TraerPorPuesto($request, $response, $args) {
+        if (Validadores::ValidarParametros($args, [ "puesto" ])) {
+            $lista = Usuario::ObtenerUsuariosPorPuesto($args["puesto"]);
+
+            if (is_array($lista)) {
+                $payload = json_encode(array("Lista" => $lista));
+            } else {
+                $payload = json_encode(array("ERROR" => "Hubo un error al obtener todos los usuarios"));
+            }
+        } else {
+            $payload = json_encode(array("ERROR" => "El parámetro 'puesto' es obligatorio para traer a los empleados por puesto"));
+        }
+
+        $response -> getBody() -> write($payload);
+        return $response->withHeader('Content-Type', 'application/json');
+    }
+
     public function TraerUno($request, $response, $args) {
         return;
     }
