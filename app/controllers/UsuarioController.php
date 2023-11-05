@@ -8,31 +8,31 @@ class UsuarioController implements IApiUsable {
 
     public function CargarUno($request, $response, $args) {
         $parametros = $request -> getParsedBody();
-
-        if (Validadores::ValidarParametros($parametros, [ "nombre", "apellido", "dni", "email", "clave", "puesto" ])) {
+    
+        if (!Validadores::ValidarParametros($parametros, ["nombre", "apellido", "dni", "email", "clave", "puesto"])) {
+            $payload = json_encode(array("ERROR" => "Los parámetros obligatorios para cargar un nuevo usuario son: nombre, apellido, dni, email, clave y puesto"));
+        } else {
             $resultado = false;
-            $sector = "";
+    
             if ($parametros["puesto"] != 'mozo') {
-                if (Validadores::ValidarParametros($parametros, [ "sector" ])) {
+                if (!Validadores::ValidarParametros($parametros, ["sector"])) {
+                    $payload = json_encode(array("ERROR" => "Se debe especificar un sector si el empleado no es un mozo"));
+                } else {
                     $usuario = new Usuario($parametros['nombre'], $parametros['apellido'], $parametros['dni'], $parametros['email'], $parametros['clave'], $parametros['puesto'], $parametros['sector']);
                     $resultado = $usuario -> CrearUsuario();
-                } else {
-                    $payload = json_encode(array("ERROR" => "Se debe especificar un sector si el empleado no es un mozo"));
                 }
             } else {
                 $usuario = new Usuario($parametros['nombre'], $parametros['apellido'], $parametros['dni'], $parametros['email'], $parametros['clave'], $parametros['puesto']);
                 $resultado = $usuario -> CrearUsuario();
             }
-
+    
             if (is_numeric($resultado)) {
                 $payload = json_encode(array("Resultado" => "Se ha creado con éxito un usuario con el ID {$resultado}"));
-            } else {
-                if (!isset($payload)) $payload = json_encode(array("ERROR" => "Hubo un error durante el alta del nuevo usuario"));              
+            } elseif (!isset($payload)) {
+                $payload = json_encode(array("ERROR" => "Hubo un error durante el alta del nuevo usuario"));
             }
-        } else {
-            $payload = json_encode(array("ERROR" => "Los parámetros obligatorios para cargar un nuevo usuario son: nombre, apellido, dni, email, clave y puesto"));
         }
-
+    
         $response -> getBody() -> write($payload);
         return $response -> withHeader('Content-Type', 'application/json');
     }
