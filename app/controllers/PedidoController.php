@@ -9,23 +9,24 @@ class PedidoController implements IApiUsable {
     public function CargarUno($request, $response, $args) {
         $parametros = $request -> getParsedBody();
 
-        if (Validadores::ValidarParametros($parametros, [ "idMesa", "idProducto", "idEmpleado" ])) {
+        if (Validadores::ValidarParametros($parametros, [ "idMesa", "idProducto", "nombreCliente" ])) {
             $mesa = Mesa::ObtenerMesa($parametros["idMesa"]);
-            if ($mesa != false && Producto::ObtenerProducto($parametros["idProducto"]) != false && Usuario::ObtenerUsuario($parametros["idEmpleado"]) != false) {
+            if ($mesa != false && Producto::ObtenerProducto($parametros["idProducto"]) != false) {
                 $numeroIdentificacion = "";
-                if ($mesa -> estado != "Cerrada") {
+                if ($mesa -> estado != "cerrada") {
                     $numeroIdentificacion = Pedido::ObtenerUltimoPedidoPorMesa($parametros['idMesa']) -> numeroIdentificacion;
                 } else {
                     $numeroIdentificacion = self::GenerarNumeroAlfanumericoIdentificacion(5);
                     $fotoMesa = $request -> getUploadedFiles()['foto'];
                     self::SubirFotoMesa($numeroIdentificacion, $fotoMesa);
                 }
-                $pedido = new Pedido($parametros['idMesa'], $parametros['idProducto'], $parametros['idEmpleado'], $numeroIdentificacion);
-                $resultado = $pedido -> CrearPedido();
-                $mesa -> CambiarEstado("Con cliente esperando pedido");
 
-                if (is_numeric($resultado)) {
-                    $payload = json_encode(array("Resultado" => "Se ha creado un pedido con el ID {$resultado}"));
+                $pedido = new Pedido($parametros['idMesa'], $parametros['idProducto'], $parametros["nombreCliente"], $numeroIdentificacion);
+                $resultado = $pedido -> CrearPedido();
+                $mesa -> CambiarEstado("con cliente esperando pedido");
+
+                if (is_string($resultado)) {
+                    $payload = json_encode(array("Resultado" => "Se ha creado un pedido con el número de identificación {$resultado}"));
                 } else {
                     $payload = json_encode(array("ERROR" => "Hubo un error durante la creación del pedido"));
                 }

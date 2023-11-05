@@ -4,8 +4,9 @@ class Pedido {
     public $id;
     public $idMesa;
     public $idProducto;
-    public $idEmpleado;
+    public $nombreCliente;
     public $numeroIdentificacion;
+    public $estado;
     public $fecha;
 
     public function __construct() {
@@ -17,33 +18,33 @@ class Pedido {
         }
     }
 
-    public function __construct7($id, $idMesa, $idProducto, $idEmpleado, $numeroIdentificacion, $estado, $fecha) {
+    public function __construct7($id, $idMesa, $idProducto, $nombreCliente, $numeroIdentificacion, $estado, $fecha) {
         $this -> id = $id;
         $this -> idMesa = $idMesa;
         $this -> idProducto = $idProducto;
-        $this -> idEmpleado = $idEmpleado;
+        $this -> nombreCliente = $nombreCliente;
         $this -> numeroIdentificacion = $numeroIdentificacion;
         $this -> estado = $estado;
         $this -> fecha = $fecha;
     }
 
-    public function __construct4($idMesa, $idProducto, $idEmpleado, $numeroIdentificacion) {
+    public function __construct4($idMesa, $idProducto, $nombreCliente, $numeroIdentificacion) {
         if ($numeroIdentificacion == "") $numeroIdentificacion = self::GenerarNumeroAlfanumericoIdentificacion(5);
-        $this -> __construct7(0, $idMesa, $idProducto, $idEmpleado, $numeroIdentificacion, "", "");
+        $this -> __construct7(0, $idMesa, $idProducto, $nombreCliente, $numeroIdentificacion, "", "");
     }
 
     public function CrearPedido() {
         $retorno = false;
         $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
-        $consulta = $objetoAccesoDatos -> PrepararConsulta("INSERT INTO Pedidos (idMesa, idProducto, idEmpleado, numeroIdentificacion) VALUES (:idMesa, :idProducto, :idEmpleado, :numeroIdentificacion)");
+        $consulta = $objetoAccesoDatos -> PrepararConsulta("INSERT INTO Pedidos (idMesa, idProducto, nombreCliente, numeroIdentificacion) VALUES (:idMesa, :idProducto, :nombreCliente, :numeroIdentificacion)");
         $consulta -> bindParam(':idMesa', $this -> idMesa);
         $consulta -> bindParam(':idProducto', $this -> idProducto);
-        $consulta -> bindParam(':idEmpleado', $this -> idEmpleado);
+        $consulta -> bindParam(':nombreCliente', $this -> nombreCliente);
         $consulta -> bindParam(':numeroIdentificacion', $this -> numeroIdentificacion);
 
         $resultado = $consulta -> execute();
         if ($resultado) {
-            $retorno = $objetoAccesoDatos -> ObtenerUltimoId();
+            $retorno = $this -> numeroIdentificacion;
         }
         return $retorno;
     }

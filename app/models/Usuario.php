@@ -40,10 +40,20 @@ class Usuario {
         $this -> __construct10(0, $nombre, $apellido, $dni, $email, $clave, "", $puesto, $sector, "");
     }
 
+    public function __construct6($nombre, $apellido, $dni, $email, $clave, $puesto) {
+        $this -> __construct7($nombre, $apellido, $dni, $email, $clave, $puesto, "");
+    }
+
     public function CrearUsuario() {
         $retorno = false;
         $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
-        $consulta = $objetoAccesoDatos -> PrepararConsulta("INSERT INTO usuarios (nombre, apellido, dni, email, clave, puesto, sector) VALUES (:nombre, :apellido, :dni, :email, :clave, :puesto, :sector)");
+        $query = "";
+        if ($this -> sector == "") {
+            $query = "INSERT INTO usuarios (nombre, apellido, dni, email, clave, puesto) VALUES (:nombre, :apellido, :dni, :email, :clave, :puesto)";
+        } else {
+            $query = "INSERT INTO usuarios (nombre, apellido, dni, email, clave, puesto, sector) VALUES (:nombre, :apellido, :dni, :email, :clave, :puesto, :sector)";
+        }
+        $consulta = $objetoAccesoDatos -> PrepararConsulta($query);
         $consulta -> bindParam(':nombre', $this -> nombre);
         $consulta -> bindParam(':apellido', $this -> apellido);
         $consulta -> bindParam(':dni', $this -> dni);
@@ -51,7 +61,7 @@ class Usuario {
         $claveHash = password_hash($this -> clave, PASSWORD_DEFAULT);
         $consulta -> bindParam(':clave', $claveHash);
         $consulta -> bindParam(':puesto', $this -> puesto);
-        $consulta -> bindParam(':sector', $this -> sector);
+        if ($this -> sector != "") $consulta -> bindParam(':sector', $this -> sector);
 
         $resultado = $consulta -> execute();
         if ($resultado) {

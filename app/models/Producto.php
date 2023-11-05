@@ -4,6 +4,7 @@ class Producto {
     public $id;
     public $nombre;
     public $tipo;
+    public $sector;
     public $precio;
     public $tiempoPreparacion;
     public $fechaIncorporacion;
@@ -17,25 +18,27 @@ class Producto {
         }
     }
 
-    public function __construct6($id, $nombre, $tipo, $precio, $tiempoPreparacion, $fechaIncorporacion) {
+    public function __construct7($id, $nombre, $tipo, $sector, $precio, $tiempoPreparacion, $fechaIncorporacion) {
         $this -> id = $id;
         $this -> nombre = $nombre;
         $this -> tipo = $tipo;
+        $this -> sector = $sector;
         $this -> precio = $precio;
         $this -> tiempoPreparacion = $tiempoPreparacion;
         $this -> fechaIncorporacion = $fechaIncorporacion;
     }
 
-    public function __construct4($nombre, $tipo, $precio, $tiempoPreparacion) {
-        $this -> __construct6(0, $nombre, $tipo, $precio, $tiempoPreparacion,"");
+    public function __construct5($nombre, $tipo, $sector, $precio, $tiempoPreparacion) {
+        $this -> __construct7(0, $nombre, $tipo, $sector, $precio, $tiempoPreparacion,"");
     }
 
     public function CrearProducto() {
         $retorno = false;
         $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
-        $consulta = $objetoAccesoDatos->PrepararConsulta("INSERT INTO Productos (nombre, tipo, precio, tiempoPreparacion) VALUES (:nombre, :tipo, :precio, :tiempoPreparacion)");
+        $consulta = $objetoAccesoDatos -> PrepararConsulta("INSERT INTO Productos (nombre, tipo, sector, precio, tiempoPreparacion) VALUES (:nombre, :tipo, :sector, :precio, :tiempoPreparacion)");
         $consulta->bindParam(':nombre', $this -> nombre);
         $consulta->bindParam(':tipo', $this -> tipo);
+        $consulta->bindParam(':sector', $this -> sector);
         $consulta->bindParam(':precio', $this -> precio);
         $consulta->bindParam(':tiempoPreparacion', $this -> tiempoPreparacion);
 

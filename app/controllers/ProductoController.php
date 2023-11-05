@@ -9,8 +9,8 @@ class ProductoController implements IApiUsable {
     public function CargarUno($request, $response, $args) {
         $parametros = $request -> getParsedBody();
 
-        if (Validadores::ValidarParametros($parametros, [ "nombre", "tipo", "precio", "tiempoPreparacion" ])) { 
-            $producto = new Producto($parametros['nombre'], $parametros['tipo'], $parametros['precio'], $parametros['tiempoPreparacion']);
+        if (Validadores::ValidarParametros($parametros, [ "nombre", "tipo", "sector", "precio", "tiempoPreparacion" ])) { 
+            $producto = new Producto($parametros['nombre'], $parametros['tipo'], $parametros['sector'], $parametros['precio'], $parametros['tiempoPreparacion']);
             $resultado = $producto -> CrearProducto();
 
             if (is_numeric($resultado)) {
