@@ -52,6 +52,7 @@ $app ->group('/pedidos', function (RouteCollectorProxy $group) {
     $group -> get('/tiempoRestante/{numeroIdentificacion}', \PedidoController::class . ':TraerTiempoEstimadoPedido');
     $group -> get('/sector/{sector}', \PedidoController::class . ':TraerPedidosPorSector');
     $group -> post('[/]', \PedidoController::class . ':CargarUno');
+    $group -> post('/cambioEstado/{id}', \PedidoController::class . ':CambiarEstado');
 });
 #endregion
 #endregion

@@ -60,6 +60,18 @@ class Pedido {
         return $retorno;
     }
 
+    public static function ObtenerPedidoPorID($id) {
+        $retorno = false;
+        $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
+        $consulta = $objetoAccesoDatos -> PrepararConsulta("SELECT * FROM pedidos WHERE id = :id");
+        $consulta -> bindParam(':id', $id);
+        $resultado = $consulta -> execute();
+        if ($resultado && $consulta -> rowCount() > 0) {
+            $retorno = $consulta -> fetchObject('Pedido');
+        }
+        return $retorno;
+    }
+
     public static function ObtenerUltimoPedidoPorMesa($idMesa) {
         $retorno = false;
         $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
@@ -80,24 +92,6 @@ class Pedido {
         $resultado = $consulta -> execute();
         if ($resultado) {
             $retorno = $consulta -> fetchAll(PDO::FETCH_CLASS, 'Pedido');
-        }
-        return $retorno;
-    }
-
-    public static function ObtenerPedidosPorSector($sector, $traerPendientes = true) {
-        $retorno = false;
-        $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
-        $query = "";
-        if ($traerPendientes) {
-            $query = "SELECT pe.idMesa AS mesa, pr.nombre AS nombreProducto, pe.fecha AS fechaPedido, pr.tiempoPreparacion / 60 AS minutosPreparacion FROM pedidos AS pe INNER JOIN productos AS pr ON pe.idProducto = pr.id WHERE pr.sector = :sector AND pe.estado = 'pendiente'";
-        } else {
-            $query = "SELECT pe.idMesa AS mesa, pr.nombre AS nombreProducto, pe.fecha AS fechaPedido, pr.tiempoPreparacion / 60 AS minutosPreparacion FROM pedidos AS pe INNER JOIN productos AS pr ON pe.idProducto = pr.id WHERE pr.sector = :sector";
-        }
-        $consulta = $objetoAccesoDatos -> PrepararConsulta($query);
-        $consulta -> bindParam(':sector', $sector);
-        $resultado = $consulta -> execute();
-        if ($resultado) {
-            $retorno = $consulta -> fetchAll(PDO::FETCH_OBJ);
         }
         return $retorno;
     }
@@ -125,6 +119,33 @@ class Pedido {
             $minutos = ($diferencia -> days * 24 * 60) + ($diferencia -> h * 60) + $diferencia -> i;
             $retorno *= $minutos;
         }
+        return $retorno;
+    }
+
+    public static function ObtenerPedidosPorSector($sector, $traerPendientes = true) {
+        $retorno = false;
+        $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
+        $query = "";
+        if ($traerPendientes) {
+            $query = "SELECT pe.idMesa AS mesa, pr.nombre AS nombreProducto, pe.fecha AS fechaPedido, pr.tiempoPreparacion / 60 AS minutosPreparacion FROM pedidos AS pe INNER JOIN productos AS pr ON pe.idProducto = pr.id WHERE pr.sector = :sector AND pe.estado = 'pendiente'";
+        } else {
+            $query = "SELECT pe.idMesa AS mesa, pr.nombre AS nombreProducto, pe.fecha AS fechaPedido, pr.tiempoPreparacion / 60 AS minutosPreparacion FROM pedidos AS pe INNER JOIN productos AS pr ON pe.idProducto = pr.id WHERE pr.sector = :sector";
+        }
+        $consulta = $objetoAccesoDatos -> PrepararConsulta($query);
+        $consulta -> bindParam(':sector', $sector);
+        $resultado = $consulta -> execute();
+        if ($resultado) {
+            $retorno = $consulta -> fetchAll(PDO::FETCH_OBJ);
+        }
+        return $retorno;
+    }
+
+    public static function CambiarEstado($id, $nuevoEstado) {
+        $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
+        $consulta = $objetoAccesoDatos -> PrepararConsulta("UPDATE pedidos SET estado = :nuevoEstado WHERE id = :id");
+        $consulta -> bindParam(':nuevoEstado', $nuevoEstado);
+        $consulta -> bindParam(':id', $id);
+        $retorno = $consulta -> execute();
         return $retorno;
     }
 }

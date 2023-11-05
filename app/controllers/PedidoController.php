@@ -112,8 +112,55 @@ class PedidoController implements IApiUsable {
         return $response->withHeader('Content-Type', 'application/json');
     }
 
+    public function CambiarEstado($request, $response, $args) {
+        if (Validadores::ValidarParametros($args, ["id"])) {
+            $payload = json_encode(array("ERROR" => "Hubo un error al cambiar el estado"));
+            $pedido = Pedido::ObtenerPedidoPorID($args["id"]);
+            if ($pedido) {
+                $nuevoEstado = false;
+                switch($pedido -> estado) {
+                    case 'pendiente':
+                        $nuevoEstado = 'en preparacion';
+                        break;
+                    case 'en preparacion':
+                        $nuevoEstado = 'listo para servir';
+                    break;
+                    default:
+                        $nuevoEstado = false;
+                    break;
+                }
+
+                if ($nuevoEstado) {
+                    if (Pedido::CambiarEstado($args["id"], $nuevoEstado)) {
+                        $payload = json_encode(array("Resultado" => "El estado del pedido fue cambiado a '{$nuevoEstado}'"));
+                    }
+                } else {
+                    $payload = json_encode(array("ERROR" => "No se puede cambiar el estado del pedido que se encuentra con el estado '{$pedido -> estado}'"));
+                }
+            }
+        } else {
+            $payload = json_encode(array("ERROR" => "El parámetro 'sector' es obligatorio para traer los pedidos por sector"));
+        }
+        
+        $response -> getBody() -> write($payload);
+        return $response->withHeader('Content-Type', 'application/json');
+    }
+
     public function TraerUno($request, $response, $args) {
-        return;
+        if (Validadores::ValidarParametros($args, ["id"])) {
+            $pedido = Pedido::ObtenerPedidoPorID($args["id"]);
+
+            if ($pedido) {
+                $payload = json_encode(array("Pedido" => $pedido));
+            } else {
+                $payload = json_encode(array("ERROR" => "Hubo un error al obtener el pedido"));
+            }
+        } else {
+            $payload = json_encode(array("ERROR" => "El parámetro 'id' es obligatorio para traer un pedido"));
+        }
+        
+        $response -> getBody() -> write($payload);
+        return $response->withHeader('Content-Type', 'application/json');
     }
 
 	public function BorrarUno($request, $response, $args) {
