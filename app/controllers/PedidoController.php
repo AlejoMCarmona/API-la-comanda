@@ -6,7 +6,6 @@ require_once './interfaces/IApiUsable.php';
 
 class PedidoController implements IApiUsable {
 
-    //TODO: AGREGAR IMAGEN
     public function CargarUno($request, $response, $args) {
         $parametros = $request -> getParsedBody();
 
