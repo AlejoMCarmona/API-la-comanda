@@ -12,6 +12,9 @@ require_once './controllers/UsuarioController.php';
 require_once './controllers/ProductoController.php';
 require_once './controllers/PedidoController.php';
 #endregion
+#region Middlewares
+require_once './Middlewares/AuthMiddleware.php';
+#endregion
 
 // Cargar .env
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
@@ -28,32 +31,32 @@ $app -> get('/', function (Request $request, Response $response, $args) {
 #endregion
 #region Mesas
 $app -> group('/mesas', function (RouteCollectorProxy $group) {
-    $group -> post('[/]', \MesaController::class . ':CargarUno');
-    $group -> get('[/]', \MesaController::class . ':TraerTodos');
+    $group -> post('[/]', \MesaController::class . ':CargarUno') -> add(new AuthMiddleware(["socio"], "POST"));
+    $group -> get('[/]', \MesaController::class . ':TraerTodos') -> add(new AuthMiddleware(["socio"]), "GET");
 });
 #endregion
 #region Usuarios
 $app -> group('/usuarios', function (RouteCollectorProxy $group) {
-    $group -> post('[/]', \UsuarioController::class . ':CargarUno');
+    $group -> post('[/]', \UsuarioController::class . ':CargarUno') -> add(new AuthMiddleware(["socio"], "POST"));
     $group -> post('/login', \UsuarioController::class . ':IniciarSesion');
-    $group -> get('[/]', \UsuarioController::class . ':TraerTodos');
-    $group -> get('/puesto/{puesto}', \UsuarioController::class . ':TraerPorPuesto');
+    $group -> get('[/]', \UsuarioController::class . ':TraerTodos') -> add(new AuthMiddleware(["socio"]), "GET");;
+    $group -> get('/puesto/{puesto}', \UsuarioController::class . ':TraerPorPuesto') -> add(new AuthMiddleware(["socio"]), "GET");;
 });
 #endregion
 #region Productos
 $app -> group('/productos', function (RouteCollectorProxy $group) {
-    $group -> post('[/]', \ProductoController::class . ':CargarUno');
+    $group -> post('[/]', \ProductoController::class . ':CargarUno') -> add(new AuthMiddleware(["socio"], "POST"));
     $group -> get('[/]', \ProductoController::class . ':TraerTodos');
 });
 #endregion
 #region Pedidos
 $app ->group('/pedidos', function (RouteCollectorProxy $group) {
-    $group -> get('[/]', \PedidoController::class . ':TraerTodos');
-    $group -> get('/{numeroIdentificacion}', \PedidoController::class . ':TraerPorNumeroIdentificacion');
+    $group -> get('[/]', \PedidoController::class . ':TraerTodos') -> add(new AuthMiddleware(["socio"]), "GET");
+    $group -> get('/{numeroIdentificacion}', \PedidoController::class . ':TraerPorNumeroIdentificacion') -> add(new AuthMiddleware(["socio","cocinero","cervecero","bartender"], "GET"));
     $group -> get('/tiempoRestante/{numeroIdentificacion}', \PedidoController::class . ':TraerTiempoEstimadoPedido');
-    $group -> get('/sector/{sector}', \PedidoController::class . ':TraerPedidosPorSector');
-    $group -> post('[/]', \PedidoController::class . ':CargarUno');
-    $group -> post('/cambioEstado/{id}', \PedidoController::class . ':CambiarEstado');
+    $group -> get('/sector/{sector}', \PedidoController::class . ':TraerPedidosPorSector') -> add(new AuthMiddleware(["socio","cocinero","cervecero","bartender"], "GET"));
+    $group -> post('[/]', \PedidoController::class . ':CargarUno') -> add(new AuthMiddleware(["mozo"], "POST"));
+    $group -> post('/cambioEstado/{id}', \PedidoController::class . ':CambiarEstado') -> add(new AuthMiddleware(["cocinero","cervecero","bartender"], "POST"));
 });
 #endregion
 #endregion
