@@ -2,11 +2,13 @@
 
 require_once './models/Mesa.php';
 require_once './interfaces/IApiUsable.php';
+require_once './middlewares/Validadores.php';
 
 class MesaController implements IApiUsable {
 
     public function CargarUno($request, $response, $args) {
-        $mesa = new Mesa();
+        $numeroIdentificacion = Validadores::GenerarNumeroAlfanumericoIdentificacion(5, "Mesa");
+        $mesa = new Mesa($numeroIdentificacion);
 
         $resultado = $mesa -> CrearMesa();
         if (is_numeric($resultado)) {

@@ -53,10 +53,10 @@ $app -> group('/productos', function (RouteCollectorProxy $group) {
 $app ->group('/pedidos', function (RouteCollectorProxy $group) {
     $group -> get('[/]', \PedidoController::class . ':TraerTodos') -> add(new AuthMiddleware(["socio"]), "GET");
     $group -> get('/{numeroIdentificacion}', \PedidoController::class . ':TraerPorNumeroIdentificacion') -> add(new AuthMiddleware(["socio","cocinero","cervecero","bartender"], "GET"));
-    $group -> get('/tiempoRestante/{numeroIdentificacion}', \PedidoController::class . ':TraerTiempoEstimadoPedido');
+    $group -> get('/tiempoRestante/{codigoMesa}/{idPedido}', \PedidoController::class . ':TraerTiempoEstimadoPedido');
     $group -> get('/sector/{sector}', \PedidoController::class . ':TraerPedidosPorSector') -> add(new AuthMiddleware(["socio","cocinero","cervecero","bartender"], "GET"));
     $group -> post('[/]', \PedidoController::class . ':CargarUno') -> add(new AuthMiddleware(["mozo"], "POST"));
-    $group -> post('/cambioEstado/{id}', \PedidoController::class . ':CambiarEstado') -> add(new AuthMiddleware(["cocinero","cervecero","bartender"], "POST"));
+    $group -> post('/cambioEstado', \PedidoController::class . ':CambiarEstado') -> add(new AuthMiddleware(["cocinero","cervecero","bartender"], "POST"));
 });
 #endregion
 #endregion

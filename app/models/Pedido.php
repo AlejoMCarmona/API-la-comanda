@@ -2,11 +2,12 @@
 
 class Pedido {
     public $id;
-    public $idMesa;
+    public $codigoMesa;
     public $idProducto;
     public $nombreCliente;
     public $numeroIdentificacion;
     public $estado;
+    public $tiempoPreparacion;
     public $fecha;
 
     public function __construct() {
@@ -18,9 +19,9 @@ class Pedido {
         }
     }
 
-    public function __construct7($id, $idMesa, $idProducto, $nombreCliente, $numeroIdentificacion, $estado, $fecha) {
+    public function __construct7($id, $codigoMesa, $idProducto, $nombreCliente, $numeroIdentificacion, $estado, $fecha) {
         $this -> id = $id;
-        $this -> idMesa = $idMesa;
+        $this -> codigoMesa = $codigoMesa;
         $this -> idProducto = $idProducto;
         $this -> nombreCliente = $nombreCliente;
         $this -> numeroIdentificacion = $numeroIdentificacion;
@@ -28,16 +29,16 @@ class Pedido {
         $this -> fecha = $fecha;
     }
 
-    public function __construct4($idMesa, $idProducto, $nombreCliente, $numeroIdentificacion) {
+    public function __construct4($codigoMesa, $idProducto, $nombreCliente, $numeroIdentificacion) {
         if ($numeroIdentificacion == "") $numeroIdentificacion = self::GenerarNumeroAlfanumericoIdentificacion(5);
-        $this -> __construct7(0, $idMesa, $idProducto, $nombreCliente, $numeroIdentificacion, "", "");
+        $this -> __construct7(0, $codigoMesa, $idProducto, $nombreCliente, $numeroIdentificacion, "", "");
     }
 
     public function CrearPedido() {
         $retorno = false;
         $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
-        $consulta = $objetoAccesoDatos -> PrepararConsulta("INSERT INTO Pedidos (idMesa, idProducto, nombreCliente, numeroIdentificacion) VALUES (:idMesa, :idProducto, :nombreCliente, :numeroIdentificacion)");
-        $consulta -> bindParam(':idMesa', $this -> idMesa);
+        $consulta = $objetoAccesoDatos -> PrepararConsulta("INSERT INTO Pedidos (codigoMesa, idProducto, nombreCliente, numeroIdentificacion) VALUES (:codigoMesa, :idProducto, :nombreCliente, :numeroIdentificacion)");
+        $consulta -> bindParam(':codigoMesa', $this -> codigoMesa);
         $consulta -> bindParam(':idProducto', $this -> idProducto);
         $consulta -> bindParam(':nombreCliente', $this -> nombreCliente);
         $consulta -> bindParam(':numeroIdentificacion', $this -> numeroIdentificacion);
@@ -72,11 +73,11 @@ class Pedido {
         return $retorno;
     }
 
-    public static function ObtenerUltimoPedidoPorMesa($idMesa) {
+    public static function ObtenerUltimoPedidoPorMesa($codigoMesa) {
         $retorno = false;
         $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
-        $consulta = $objetoAccesoDatos -> PrepararConsulta("SELECT * FROM pedidos WHERE idMesa = :idMesa ORDER BY fecha DESC LIMIT 1");
-        $consulta -> bindParam(':idMesa', $idMesa);
+        $consulta = $objetoAccesoDatos -> PrepararConsulta("SELECT * FROM pedidos WHERE codigoMesa = :codigoMesa ORDER BY fecha DESC LIMIT 1");
+        $consulta -> bindParam(':codigoMesa', $codigoMesa);
         $resultado = $consulta -> execute();
         if ($resultado) {
             $retorno = $consulta -> fetchObject('Pedido');
@@ -84,7 +85,7 @@ class Pedido {
         return $retorno;
     }
 
-    public static function ObtenerPedidosPorNumeroIdentificacion($numeroIdentificacion) {
+    public static function ObtenerPorNumeroIdentificacion($numeroIdentificacion) {
         $retorno = false;
         $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
         $consulta = $objetoAccesoDatos -> PrepararConsulta("SELECT * FROM pedidos WHERE numeroIdentificacion = :numeroIdentificacion");
@@ -96,28 +97,32 @@ class Pedido {
         return $retorno;
     }
 
-    public static function ObtenerTiempoRestantePorNumeroIdentificacion($numeroIdentificacion) {
+    public static function ObtenerTiempoRestantePorNumeroIdentificacion($codigoMesa, $idPedido) {
         $retorno = false;
         $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
-        $consultaTiempo = $objetoAccesoDatos -> PrepararConsulta("SELECT MIN(pe.fecha) as fechaInicial, MAX(pr.tiempoPreparacion)/60 as tiempoPreparacion FROM pedidos AS pe INNER JOIN productos as pr ON pe.idProducto = pr.id WHERE numeroIdentificacion = :numeroIdentificacion");
-        $consultaTiempo -> bindParam(':numeroIdentificacion', $numeroIdentificacion);
+        $consultaTiempo = $objetoAccesoDatos -> PrepararConsulta("SELECT estado, fecha, tiempoPreparacion/60 as minutosPreparacion FROM pedidos WHERE id = :idPedido AND codigoMesa = :codigoMesa");
+        $consultaTiempo -> bindParam(':idPedido', $idPedido);
+        $consultaTiempo -> bindParam(':codigoMesa', $codigoMesa);
         $resultadoTiempo = $consultaTiempo -> execute();
-        if ($resultadoTiempo) {
+
+        if ($resultadoTiempo && $consultaTiempo -> rowCount() > 0) {
             $retornoConsulta = $consultaTiempo -> fetchObject();
-            $fechaInicial = $retornoConsulta -> fechaInicial;
-            $tiempoPreparacion = (int)($retornoConsulta -> tiempoPreparacion);
-            // Manejo de fechas
-            $fechaInicio = new DateTime($fechaInicial);
-            $fechaDeFinalizacion = $fechaInicio -> modify("+{$tiempoPreparacion} minutes");
-            $fechaActual = new DateTime();
-            if ($fechaActual > $fechaDeFinalizacion) {
-                $retorno = -1;
-            } else {
-                $retorno = 1;
+            if ($retornoConsulta -> estado == 'en preparacion') { // Si el pedido no está en preparación, se le notificará al usuario que aún no se puede obtener el tiempo restante
+                $fechaInicial = $retornoConsulta -> fecha;
+                $minutosPreparacion = (int)($retornoConsulta -> minutosPreparacion);
+                // Manejo de fechas
+                $fechaInicio = new DateTime($fechaInicial);
+                $fechaDeFinalizacion = $fechaInicio -> modify("+{$minutosPreparacion} minutes");
+                $fechaActual = new DateTime();
+                if ($fechaActual > $fechaDeFinalizacion) {
+                    $retorno = -1;
+                } else {
+                    $retorno = 1;
+                }
+                $diferencia = date_diff($fechaActual, $fechaDeFinalizacion);
+                $minutos = ($diferencia -> days * 24 * 60) + ($diferencia -> h * 60) + $diferencia -> i;
+                $retorno *= $minutos;
             }
-            $diferencia = date_diff($fechaActual, $fechaDeFinalizacion);
-            $minutos = ($diferencia -> days * 24 * 60) + ($diferencia -> h * 60) + $diferencia -> i;
-            $retorno *= $minutos;
         }
         return $retorno;
     }
@@ -127,9 +132,9 @@ class Pedido {
         $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
         $query = "";
         if ($traerPendientes) {
-            $query = "SELECT pe.idMesa AS mesa, pr.nombre AS nombreProducto, pe.fecha AS fechaPedido, pr.tiempoPreparacion / 60 AS minutosPreparacion FROM pedidos AS pe INNER JOIN productos AS pr ON pe.idProducto = pr.id WHERE pr.sector = :sector AND pe.estado = 'pendiente'";
+            $query = "SELECT pe.codigoMesa AS mesa, pr.nombre AS nombreProducto, pe.fecha AS fechaPedido FROM pedidos AS pe INNER JOIN productos AS pr ON pe.idProducto = pr.id WHERE pr.sector = :sector AND pe.estado = 'pendiente'";
         } else {
-            $query = "SELECT pe.idMesa AS mesa, pr.nombre AS nombreProducto, pe.fecha AS fechaPedido, pr.tiempoPreparacion / 60 AS minutosPreparacion FROM pedidos AS pe INNER JOIN productos AS pr ON pe.idProducto = pr.id WHERE pr.sector = :sector";
+            $query = "SELECT pe.codigoMesa AS mesa, pr.nombre AS nombreProducto, pe.fecha AS fechaPedido FROM pedidos AS pe INNER JOIN productos AS pr ON pe.idProducto = pr.id WHERE pr.sector = :sector";
         }
         $consulta = $objetoAccesoDatos -> PrepararConsulta($query);
         $consulta -> bindParam(':sector', $sector);
@@ -140,10 +145,17 @@ class Pedido {
         return $retorno;
     }
 
-    public static function CambiarEstado($id, $nuevoEstado) {
+    public static function CambiarEstado($id, $nuevoEstado, $tiempoPreparacion) {
         $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
-        $consulta = $objetoAccesoDatos -> PrepararConsulta("UPDATE pedidos SET estado = :nuevoEstado WHERE id = :id");
+        $consulta = "";
+        if ($tiempoPreparacion != "") {
+            $consulta = "UPDATE pedidos SET estado = :nuevoEstado, fecha = NOW(), tiempoPreparacion = :tiempoPreparacion WHERE id = :id";
+        } else {
+            $consulta = "UPDATE pedidos SET estado = :nuevoEstado, fecha = NOW() WHERE id = :id";
+        }
+        $consulta = $objetoAccesoDatos -> PrepararConsulta($consulta);
         $consulta -> bindParam(':nuevoEstado', $nuevoEstado);
+        if ($tiempoPreparacion != "") $consulta -> bindParam(':tiempoPreparacion', $tiempoPreparacion);
         $consulta -> bindParam(':id', $id);
         $retorno = $consulta -> execute();
         return $retorno;

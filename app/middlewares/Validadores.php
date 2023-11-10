@@ -19,6 +19,21 @@ class Validadores {
         }
         return true;
     }
+
+    public static function GenerarNumeroAlfanumericoIdentificacion($longitud, $clase) {
+        $caracteres = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $numeroIdentificacion = '';
+        
+        do {
+            for ($i = 0; $i < $longitud; $i++) {
+                $indiceRandom = mt_rand(0, strlen($caracteres) - 1);
+                $numeroIdentificacion .= $caracteres[$indiceRandom];
+            }
+            $numeroExistente = $clase::ObtenerPorNumeroIdentificacion($numeroIdentificacion);
+        } while ($numeroExistente != false);
+        
+        return $numeroIdentificacion;
+    }
 }
 
 ?>

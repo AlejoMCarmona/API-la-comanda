@@ -9,19 +9,19 @@ class PedidoController implements IApiUsable {
     public function CargarUno($request, $response, $args) {
         $parametros = $request -> getParsedBody();
 
-        if (Validadores::ValidarParametros($parametros, [ "idMesa", "idProducto", "nombreCliente" ])) {
-            $mesa = Mesa::ObtenerMesa($parametros["idMesa"]);
+        if (Validadores::ValidarParametros($parametros, [ "codigoMesa", "idProducto", "nombreCliente" ])) {
+            $mesa = Mesa::ObtenerPorNumeroIdentificacion($parametros["codigoMesa"]);
             if ($mesa != false && Producto::ObtenerProducto($parametros["idProducto"]) != false) {
                 $numeroIdentificacion = "";
                 if ($mesa -> estado != "cerrada") {
-                    $numeroIdentificacion = Pedido::ObtenerUltimoPedidoPorMesa($parametros['idMesa']) -> numeroIdentificacion;
+                    $numeroIdentificacion = Pedido::ObtenerUltimoPedidoPorMesa($parametros['codigoMesa']) -> numeroIdentificacion;
                 } else {
-                    $numeroIdentificacion = self::GenerarNumeroAlfanumericoIdentificacion(5);
+                    $numeroIdentificacion = Validadores::GenerarNumeroAlfanumericoIdentificacion(5, "Pedido");
                     $fotoMesa = $request -> getUploadedFiles()['foto'];
                     self::SubirFotoMesa($numeroIdentificacion, $fotoMesa);
                 }
 
-                $pedido = new Pedido($parametros['idMesa'], $parametros['idProducto'], $parametros["nombreCliente"], $numeroIdentificacion);
+                $pedido = new Pedido($parametros['codigoMesa'], $parametros['idProducto'], $parametros["nombreCliente"], $numeroIdentificacion);
                 $resultado = $pedido -> CrearPedido();
                 $mesa -> CambiarEstado("con cliente esperando pedido");
 
@@ -34,7 +34,7 @@ class PedidoController implements IApiUsable {
                 $payload = json_encode(array("ERROR" => "Tanto la mesa seleccionada, como el producto y el empleado, deben existir para realizar un pedido"));
             }
         } else {
-            $payload = json_encode(array("ERROR" => "Los parámetros obligatorios para cargar un nuevo pedido son: nombre, idMesa, idProducto y idEmpleado"));
+            $payload = json_encode(array("ERROR" => "Los parámetros obligatorios para cargar un nuevo pedido son: nombre, codigoMesa, idProducto y idEmpleado"));
         }
 
         $response -> getBody() -> write($payload);
@@ -58,7 +58,7 @@ class PedidoController implements IApiUsable {
         $parametros = $request -> getParsedBody();
 
         if (Validadores::ValidarParametros($args, [ "numeroIdentificacion" ])) {
-            $lista = Pedido::ObtenerPedidosPorNumeroIdentificacion($args["numeroIdentificacion"]);
+            $lista = Pedido::ObtenerPorNumeroIdentificacion($args["numeroIdentificacion"]);
 
             if (is_array($lista)) {
                 $payload = json_encode(array("Lista" => $lista));
@@ -74,8 +74,8 @@ class PedidoController implements IApiUsable {
     }
 
     public function TraerTiempoEstimadoPedido($request, $response, $args) {
-        if (Validadores::ValidarParametros($args, [ "numeroIdentificacion" ])) {
-            $tiempo = Pedido::ObtenerTiempoRestantePorNumeroIdentificacion($args["numeroIdentificacion"]);
+        if (Validadores::ValidarParametros($args, [ "codigoMesa", "idPedido" ])) {
+            $tiempo = Pedido::ObtenerTiempoRestantePorNumeroIdentificacion($args["codigoMesa"], $args["idPedido"]);
 
             if (is_numeric($tiempo)) {
                 $mensaje = "Faltan {$tiempo} minutos para tener tu pedido";
@@ -85,10 +85,10 @@ class PedidoController implements IApiUsable {
                 }
                 $payload = json_encode(array("Resultado" => $mensaje ));
             } else {
-                $payload = json_encode(array("ERROR" => "Hubo un error al obtener el tiempo estimado del pedido"));
+                $payload = json_encode(array("ERROR" => "No se pudo obtener el tiempo restante para la entrega del pedido"));
             }
         } else {
-            $payload = json_encode(array("ERROR" => "El parámetro 'numeroIdentificacion' es obligatorio para traer el tiempo de pedido"));
+            $payload = json_encode(array("ERROR" => "Los parámetros 'codigoMesa' y 'idPedido' son obligatorios para traer el tiempo de pedido"));
         }
 
         $response -> getBody() -> write($payload);
@@ -113,14 +113,20 @@ class PedidoController implements IApiUsable {
     }
 
     public function CambiarEstado($request, $response, $args) {
-        if (Validadores::ValidarParametros($args, ["id"])) {
+        $parametros = $request -> getParsedBody ();
+
+        if (Validadores::ValidarParametros($parametros, ["id"])) {
             $payload = json_encode(array("ERROR" => "Hubo un error al cambiar el estado"));
-            $pedido = Pedido::ObtenerPedidoPorID($args["id"]);
+            $pedido = Pedido::ObtenerPedidoPorID($parametros["id"]);
             if ($pedido) {
                 $nuevoEstado = false;
+                $tiempoPreparacion = "";
                 switch($pedido -> estado) {
                     case 'pendiente':
-                        $nuevoEstado = 'en preparacion';
+                        if (Validadores::ValidarParametros($parametros, ["tiempoPreparacion"])) {
+                            $nuevoEstado = 'en preparacion';
+                            $tiempoPreparacion = $parametros["tiempoPreparacion"];
+                        }
                         break;
                     case 'en preparacion':
                         $nuevoEstado = 'listo para servir';
@@ -131,15 +137,13 @@ class PedidoController implements IApiUsable {
                 }
 
                 if ($nuevoEstado) {
-                    if (Pedido::CambiarEstado($args["id"], $nuevoEstado)) {
+                    if (Pedido::CambiarEstado($parametros["id"], $nuevoEstado, $tiempoPreparacion)) {
                         $payload = json_encode(array("Resultado" => "El estado del pedido fue cambiado a '{$nuevoEstado}'"));
                     }
-                } else {
-                    $payload = json_encode(array("ERROR" => "No se puede cambiar el estado del pedido que se encuentra con el estado '{$pedido -> estado}'"));
                 }
             }
         } else {
-            $payload = json_encode(array("ERROR" => "El parámetro 'sector' es obligatorio para traer los pedidos por sector"));
+            $payload = json_encode(array("ERROR" => "El parámetro 'sector' es obligatorio para traer los pedidos por sector. Si el pedido se pasa a 'en preparacion', también debe pasarse 'tiempoPreparacion'"));
         }
         
         $response -> getBody() -> write($payload);
@@ -169,21 +173,6 @@ class PedidoController implements IApiUsable {
 
 	public function ModificarUno($request, $response, $args) {
         return;
-    }
-
-    private static function GenerarNumeroAlfanumericoIdentificacion($longitud) {
-        $caracteres = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        $numeroIdentificacion = '';
-        
-        do {
-            for ($i = 0; $i < $longitud; $i++) {
-                $indiceRandom = mt_rand(0, strlen($caracteres) - 1);
-                $numeroIdentificacion .= $caracteres[$indiceRandom];
-            }
-            $posiblePedidoExistente = Pedido::ObtenerPedidosPorNumeroIdentificacion($numeroIdentificacion);
-        } while ($posiblePedidoExistente != false);
-        
-        return $numeroIdentificacion;
     }
 
     private static function SubirFotoMesa($numeroIdentificacion, $fotoMesa) {

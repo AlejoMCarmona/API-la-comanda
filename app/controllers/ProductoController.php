@@ -9,8 +9,8 @@ class ProductoController implements IApiUsable {
     public function CargarUno($request, $response, $args) {
         $parametros = $request -> getParsedBody();
 
-        if (Validadores::ValidarParametros($parametros, [ "nombre", "tipo", "sector", "precio", "tiempoPreparacion" ])) { 
-            $producto = new Producto($parametros['nombre'], $parametros['tipo'], $parametros['sector'], $parametros['precio'], $parametros['tiempoPreparacion']);
+        if (Validadores::ValidarParametros($parametros, [ "nombre", "tipo", "sector", "precio" ])) { 
+            $producto = new Producto($parametros['nombre'], $parametros['tipo'], $parametros['sector'], $parametros['precio']);
             $resultado = $producto -> CrearProducto();
 
             if (is_numeric($resultado)) {
@@ -19,7 +19,7 @@ class ProductoController implements IApiUsable {
                 $payload = json_encode(array("ERROR" => "Hubo un error durante la incorporación del nuevo producto a la carta"));
             }
         } else {
-            $payload = json_encode(array("ERROR" => "Los parámetros obligatorios para agregar un nuevo producto a la carta son: nombre, tipo, precio y tiempoPreparacion"));
+            $payload = json_encode(array("ERROR" => "Los parámetros obligatorios para agregar un nuevo producto a la carta son: nombre, tipo y precio"));
         }
 
         $response -> getBody() -> write($payload);
