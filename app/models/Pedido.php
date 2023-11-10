@@ -5,7 +5,7 @@ class Pedido {
     public $codigoMesa;
     public $idProducto;
     public $nombreCliente;
-    public $numeroIdentificacion;
+    public $codigoIdentificacion;
     public $estado;
     public $tiempoPreparacion;
     public $fecha;
@@ -19,33 +19,33 @@ class Pedido {
         }
     }
 
-    public function __construct7($id, $codigoMesa, $idProducto, $nombreCliente, $numeroIdentificacion, $estado, $fecha) {
+    public function __construct7($id, $codigoMesa, $idProducto, $nombreCliente, $codigoIdentificacion, $estado, $fecha) {
         $this -> id = $id;
         $this -> codigoMesa = $codigoMesa;
         $this -> idProducto = $idProducto;
         $this -> nombreCliente = $nombreCliente;
-        $this -> numeroIdentificacion = $numeroIdentificacion;
+        $this -> codigoIdentificacion = $codigoIdentificacion;
         $this -> estado = $estado;
         $this -> fecha = $fecha;
     }
 
-    public function __construct4($codigoMesa, $idProducto, $nombreCliente, $numeroIdentificacion) {
-        if ($numeroIdentificacion == "") $numeroIdentificacion = self::GenerarNumeroAlfanumericoIdentificacion(5);
-        $this -> __construct7(0, $codigoMesa, $idProducto, $nombreCliente, $numeroIdentificacion, "", "");
+    public function __construct4($codigoMesa, $idProducto, $nombreCliente, $codigoIdentificacion) {
+        if ($codigoIdentificacion == "") $codigoIdentificacion = self::GenerarNumeroAlfanumericoIdentificacion(5);
+        $this -> __construct7(0, $codigoMesa, $idProducto, $nombreCliente, $codigoIdentificacion, "", "");
     }
 
     public function CrearPedido() {
         $retorno = false;
         $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
-        $consulta = $objetoAccesoDatos -> PrepararConsulta("INSERT INTO Pedidos (codigoMesa, idProducto, nombreCliente, numeroIdentificacion) VALUES (:codigoMesa, :idProducto, :nombreCliente, :numeroIdentificacion)");
+        $consulta = $objetoAccesoDatos -> PrepararConsulta("INSERT INTO Pedidos (codigoMesa, idProducto, nombreCliente, codigoIdentificacion) VALUES (:codigoMesa, :idProducto, :nombreCliente, :codigoIdentificacion)");
         $consulta -> bindParam(':codigoMesa', $this -> codigoMesa);
         $consulta -> bindParam(':idProducto', $this -> idProducto);
         $consulta -> bindParam(':nombreCliente', $this -> nombreCliente);
-        $consulta -> bindParam(':numeroIdentificacion', $this -> numeroIdentificacion);
+        $consulta -> bindParam(':codigoIdentificacion', $this -> codigoIdentificacion);
 
         $resultado = $consulta -> execute();
         if ($resultado) {
-            $retorno = $this -> numeroIdentificacion;
+            $retorno = $this -> codigoIdentificacion;
         }
         return $retorno;
     }
@@ -85,11 +85,11 @@ class Pedido {
         return $retorno;
     }
 
-    public static function ObtenerPorNumeroIdentificacion($numeroIdentificacion) {
+    public static function ObtenerPorCodigoIdentificacion($codigoIdentificacion) {
         $retorno = false;
         $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
-        $consulta = $objetoAccesoDatos -> PrepararConsulta("SELECT * FROM pedidos WHERE numeroIdentificacion = :numeroIdentificacion");
-        $consulta -> bindParam(':numeroIdentificacion', $numeroIdentificacion);
+        $consulta = $objetoAccesoDatos -> PrepararConsulta("SELECT * FROM pedidos WHERE codigoIdentificacion = :codigoIdentificacion");
+        $consulta -> bindParam(':codigoIdentificacion', $codigoIdentificacion);
         $resultado = $consulta -> execute();
         if ($resultado) {
             $retorno = $consulta -> fetchAll(PDO::FETCH_CLASS, 'Pedido');
@@ -97,7 +97,7 @@ class Pedido {
         return $retorno;
     }
 
-    public static function ObtenerTiempoRestantePorNumeroIdentificacion($codigoMesa, $idPedido) {
+    public static function ObtenerTiempoRestantePorCodigoIdentificacion($codigoMesa, $idPedido) {
         $retorno = false;
         $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
         $consultaTiempo = $objetoAccesoDatos -> PrepararConsulta("SELECT estado, fecha, tiempoPreparacion/60 as minutosPreparacion FROM pedidos WHERE id = :idPedido AND codigoMesa = :codigoMesa");

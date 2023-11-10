@@ -22,17 +22,17 @@ class Validadores {
 
     public static function GenerarNumeroAlfanumericoIdentificacion($longitud, $clase) {
         $caracteres = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        $numeroIdentificacion = '';
+        $codigoIdentificacion = '';
         
         do {
             for ($i = 0; $i < $longitud; $i++) {
                 $indiceRandom = mt_rand(0, strlen($caracteres) - 1);
-                $numeroIdentificacion .= $caracteres[$indiceRandom];
+                $codigoIdentificacion .= $caracteres[$indiceRandom];
             }
-            $numeroExistente = $clase::ObtenerPorNumeroIdentificacion($numeroIdentificacion);
-        } while ($numeroExistente != false);
+            $codigoExistente = $clase::ObtenerPorCodigoIdentificacion($codigoIdentificacion);
+        } while ($codigoExistente != false);
         
-        return $numeroIdentificacion;
+        return $codigoIdentificacion;
     }
 }
 

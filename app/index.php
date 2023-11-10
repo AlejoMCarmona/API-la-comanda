@@ -52,7 +52,7 @@ $app -> group('/productos', function (RouteCollectorProxy $group) {
 #region Pedidos
 $app ->group('/pedidos', function (RouteCollectorProxy $group) {
     $group -> get('[/]', \PedidoController::class . ':TraerTodos') -> add(new AuthMiddleware(["socio"]), "GET");
-    $group -> get('/{numeroIdentificacion}', \PedidoController::class . ':TraerPorNumeroIdentificacion') -> add(new AuthMiddleware(["socio","cocinero","cervecero","bartender"], "GET"));
+    $group -> get('/{codigoIdentificacion}', \PedidoController::class . ':TraerPorCodigoIdentificacion') -> add(new AuthMiddleware(["socio","cocinero","cervecero","bartender"], "GET"));
     $group -> get('/tiempoRestante/{codigoMesa}/{idPedido}', \PedidoController::class . ':TraerTiempoEstimadoPedido');
     $group -> get('/sector/{sector}', \PedidoController::class . ':TraerPedidosPorSector') -> add(new AuthMiddleware(["socio","cocinero","cervecero","bartender"], "GET"));
     $group -> post('[/]', \PedidoController::class . ':CargarUno') -> add(new AuthMiddleware(["mozo"], "POST"));

@@ -10,18 +10,18 @@ class PedidoController implements IApiUsable {
         $parametros = $request -> getParsedBody();
 
         if (Validadores::ValidarParametros($parametros, [ "codigoMesa", "idProducto", "nombreCliente" ])) {
-            $mesa = Mesa::ObtenerPorNumeroIdentificacion($parametros["codigoMesa"]);
+            $mesa = Mesa::ObtenerPorCodigoIdentificacion($parametros["codigoMesa"]);
             if ($mesa != false && Producto::ObtenerProducto($parametros["idProducto"]) != false) {
-                $numeroIdentificacion = "";
+                $codigoIdentificacion = "";
                 if ($mesa -> estado != "cerrada") {
-                    $numeroIdentificacion = Pedido::ObtenerUltimoPedidoPorMesa($parametros['codigoMesa']) -> numeroIdentificacion;
+                    $codigoIdentificacion = Pedido::ObtenerUltimoPedidoPorMesa($parametros['codigoMesa']) -> codigoIdentificacion;
                 } else {
-                    $numeroIdentificacion = Validadores::GenerarNumeroAlfanumericoIdentificacion(5, "Pedido");
+                    $codigoIdentificacion = Validadores::GenerarNumeroAlfanumericoIdentificacion(5, "Pedido");
                     $fotoMesa = $request -> getUploadedFiles()['foto'];
-                    self::SubirFotoMesa($numeroIdentificacion, $fotoMesa);
+                    self::SubirFotoMesa($codigoIdentificacion, $fotoMesa);
                 }
 
-                $pedido = new Pedido($parametros['codigoMesa'], $parametros['idProducto'], $parametros["nombreCliente"], $numeroIdentificacion);
+                $pedido = new Pedido($parametros['codigoMesa'], $parametros['idProducto'], $parametros["nombreCliente"], $codigoIdentificacion);
                 $resultado = $pedido -> CrearPedido();
                 $mesa -> CambiarEstado("con cliente esperando pedido");
 
@@ -54,11 +54,11 @@ class PedidoController implements IApiUsable {
         return $response->withHeader('Content-Type', 'application/json');
     }
 
-    public function TraerPorNumeroIdentificacion($request, $response, $args) {
+    public function TraerPorCodigoIdentificacion($request, $response, $args) {
         $parametros = $request -> getParsedBody();
 
-        if (Validadores::ValidarParametros($args, [ "numeroIdentificacion" ])) {
-            $lista = Pedido::ObtenerPorNumeroIdentificacion($args["numeroIdentificacion"]);
+        if (Validadores::ValidarParametros($args, [ "codigoIdentificacion" ])) {
+            $lista = Pedido::ObtenerPorCodigoIdentificacion($args["codigoIdentificacion"]);
 
             if (is_array($lista)) {
                 $payload = json_encode(array("Lista" => $lista));
@@ -66,7 +66,7 @@ class PedidoController implements IApiUsable {
                 $payload = json_encode(array("ERROR" => "Hubo un error al obtener los pedidos de esta mesa"));
             }
         } else {
-            $payload = json_encode(array("ERROR" => "El parámetro 'numeroIdentificacion' es obligatorio para traer los pedidos"));
+            $payload = json_encode(array("ERROR" => "El parámetro 'codigoIdentificacion' es obligatorio para traer los pedidos"));
         }
 
         $response -> getBody() -> write($payload);
@@ -75,7 +75,7 @@ class PedidoController implements IApiUsable {
 
     public function TraerTiempoEstimadoPedido($request, $response, $args) {
         if (Validadores::ValidarParametros($args, [ "codigoMesa", "idPedido" ])) {
-            $tiempo = Pedido::ObtenerTiempoRestantePorNumeroIdentificacion($args["codigoMesa"], $args["idPedido"]);
+            $tiempo = Pedido::ObtenerTiempoRestantePorCodigoIdentificacion($args["codigoMesa"], $args["idPedido"]);
 
             if (is_numeric($tiempo)) {
                 $mensaje = "Faltan {$tiempo} minutos para tener tu pedido";
@@ -175,7 +175,7 @@ class PedidoController implements IApiUsable {
         return;
     }
 
-    private static function SubirFotoMesa($numeroIdentificacion, $fotoMesa) {
+    private static function SubirFotoMesa($codigoIdentificacion, $fotoMesa) {
         $retorno = false;
 
         if ($fotoMesa -> getError() === UPLOAD_ERR_OK) {
@@ -189,7 +189,7 @@ class PedidoController implements IApiUsable {
             }
 
             $extension = pathinfo($fotoMesa -> getClientFilename(), PATHINFO_EXTENSION);
-            $nombreFoto = $numeroIdentificacion . date("Ymd") . '.' . $extension;
+            $nombreFoto = $codigoIdentificacion . date("Ymd") . '.' . $extension;
             $fotoMesa -> moveTo($path . '/' . $nombreFoto);
     
             $retorno = true;

@@ -5,7 +5,7 @@ require_once './db/AccesoDatos.php';
 class Mesa {
     public $id;
     public $estado;
-    public $numeroIdentificacion;
+    public $codigoIdentificacion;
     public $fechaCreacion;
 
     public function __construct() {
@@ -17,22 +17,22 @@ class Mesa {
         }
     }
 
-    public function __construct4($id, $estado, $numeroIdentificacion, $fecha) {
+    public function __construct4($id, $estado, $codigoIdentificacion, $fecha) {
         $this -> id = $id;
         $this -> estado = $estado;
-        $this -> numeroIdentificacion = $numeroIdentificacion;
+        $this -> codigoIdentificacion = $codigoIdentificacion;
         $this -> fecha = $fecha;
     }
 
-    public function __construct1($numeroIdentificacion) {
-        $this -> __construct4(0, "", $numeroIdentificacion, "");
+    public function __construct1($codigoIdentificacion) {
+        $this -> __construct4(0, "", $codigoIdentificacion, "");
     }
 
     public function CrearMesa() {
         $retorno = false;
         $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
-        $consulta = $objetoAccesoDatos -> PrepararConsulta("INSERT INTO MESAS (numeroIdentificacion) VALUES (:numeroIdentificacion)");
-        $consulta -> bindParam(":numeroIdentificacion", $this -> numeroIdentificacion);
+        $consulta = $objetoAccesoDatos -> PrepararConsulta("INSERT INTO MESAS (codigoIdentificacion) VALUES (:codigoIdentificacion)");
+        $consulta -> bindParam(":codigoIdentificacion", $this -> codigoIdentificacion);
         $resultado = $consulta -> execute();
         if ($resultado) {
             $retorno = $objetoAccesoDatos -> ObtenerUltimoId();
@@ -63,11 +63,11 @@ class Mesa {
         return $retorno;
     }
 
-    public static function ObtenerPorNumeroIdentificacion($numeroIdentificacion) {
+    public static function ObtenerPorCodigoIdentificacion($codigoIdentificacion) {
         $retorno = false;
         $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
-        $consulta = $objetoAccesoDatos -> PrepararConsulta("SELECT * FROM mesas WHERE numeroIdentificacion = :numeroIdentificacion");
-        $consulta -> bindParam(':numeroIdentificacion', $numeroIdentificacion);
+        $consulta = $objetoAccesoDatos -> PrepararConsulta("SELECT * FROM mesas WHERE codigoIdentificacion = :codigoIdentificacion");
+        $consulta -> bindParam(':codigoIdentificacion', $codigoIdentificacion);
         $resultado = $consulta -> execute();
         if ($resultado) {
             $retorno = $consulta -> fetchObject('Mesa');
