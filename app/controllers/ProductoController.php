@@ -52,12 +52,25 @@ class ProductoController implements IApiUsable {
             $payload = json_encode(array("ERROR" => "El parámetro 'id' es obligatorio para obtener un producto"));
         }
 
-        $response ->getBody()-> write($payload);
+        $response -> getBody() -> write($payload);
         return $response -> withHeader('Content-Type', 'application/json');
     }
 
 	public function BorrarUno($request, $response, $args) {
-        return;
+        if (Validadores::ValidarParametros($args, ["id"])) {
+            $resultado = Producto::Borrar($args["id"]);
+
+            if ($resultado) {
+                $payload = json_encode(array("Resultado" => "Se ha dado de baja el producto con el ID {$args["id"]}"));
+            } else {
+                $payload = json_encode(array("ERROR" => "No se pudo encontrar un producto con el ID {$args["id"]}"));
+            }
+        } else {
+            $payload = json_encode(array("ERROR" => "El parámetro 'id' es obligatorio para dar de baja un producto"));
+        }
+
+        $response -> getBody() -> write($payload);
+        return $response -> withHeader('Content-Type', 'application/json');
     }
 
 	public function ModificarUno($request, $response, $args) {

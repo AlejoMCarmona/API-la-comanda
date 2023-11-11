@@ -84,8 +84,21 @@ class UsuarioController implements IApiUsable {
         return $response->withHeader('Content-Type', 'application/json');
     }
 
-	public function BorrarUno($request, $response, $args) {
-        return;
+    public function BorrarUno($request, $response, $args) {
+        if (Validadores::ValidarParametros($args, ["dni"])) {
+            $resultado = Usuario::Borrar($args["dni"]);
+
+            if ($resultado) {
+                $payload = json_encode(array("Resultado" => "Se ha dado de baja el usuario con el dni {$args["dni"]}"));
+            } else {
+                $payload = json_encode(array("ERROR" => "No se pudo encontrar un usuario con el dni {$args["dni"]}"));
+            }
+        } else {
+            $payload = json_encode(array("ERROR" => "El parámetro 'dni' es obligatorio para dar de baja un usuario"));
+        }
+
+        $response->getBody()->write($payload);
+        return $response->withHeader('Content-Type', 'application/json');
     }
 
 	public function ModificarUno($request, $response, $args) {

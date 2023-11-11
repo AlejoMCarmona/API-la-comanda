@@ -68,6 +68,18 @@ class Producto {
         }
         return $retorno;
     }
+
+    public static function Borrar($id) {
+        $retorno = false;
+        $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
+        $consulta = $objetoAccesoDatos -> PrepararConsulta("UPDATE productos SET activo = FALSE WHERE id = :id");
+        $consulta -> bindParam(':id', $id);
+        $resultado = $consulta -> execute();
+        if ($resultado) {
+            $retorno = true;
+        }
+        return $retorno;
+    }
 }
 
 ?>

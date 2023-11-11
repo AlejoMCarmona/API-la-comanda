@@ -86,6 +86,20 @@ class Mesa {
         }
         return $retorno;
     }
+
+    public static function Borrar($codigoIdentificacion) {
+        $retorno = false;
+        $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
+        $consulta = $objetoAccesoDatos->PrepararConsulta("UPDATE mesas SET activa = FALSE WHERE codigoIdentificacion = :codigoIdentificacion");
+        $consulta->bindParam(':codigoIdentificacion', $codigoIdentificacion);
+        $resultado = $consulta->execute();
+
+        if ($resultado) {
+            $retorno = true;
+        }
+
+        return $retorno;
+    }
 }
 
 ?>

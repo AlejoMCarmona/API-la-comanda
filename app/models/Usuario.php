@@ -124,6 +124,20 @@ class Usuario {
         }
         return $retorno;
     }
+
+    public static function Borrar($dni) {
+        $retorno = false;
+        $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
+        $consulta = $objetoAccesoDatos -> PrepararConsulta("UPDATE usuarios SET activo = FALSE WHERE dni = :dni");
+        $consulta -> bindParam(':dni', $dni);
+        $resultado = $consulta -> execute();
+
+        if ($resultado) {
+            $retorno = true;
+        }
+
+        return $retorno;
+    }
 }
 
 ?>

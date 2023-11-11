@@ -34,6 +34,7 @@ $app -> group('/mesas', function (RouteCollectorProxy $group) {
     $group -> post('[/]', \MesaController::class . ':CargarUno') -> add(new AuthMiddleware(["socio"], "POST"));
     $group -> get('[/]', \MesaController::class . ':TraerTodos') -> add(new AuthMiddleware(["socio"]), "GET");
     $group -> get('/{codigoMesa}', \MesaController::class . ':TraerUno') -> add(new AuthMiddleware(["socio"]), "GET");
+    $group -> delete('/{codigoIdentificacion}', \MesaController::class . ':BorrarUno');
 });
 #endregion
 #region Usuarios
@@ -42,7 +43,8 @@ $app -> group('/usuarios', function (RouteCollectorProxy $group) {
     $group -> post('/login', \UsuarioController::class . ':IniciarSesion');
     $group -> get('[/]', \UsuarioController::class . ':TraerTodos') -> add(new AuthMiddleware(["socio"]), "GET");
     $group -> get('/{dni}', \UsuarioController::class . ':TraerUno') -> add(new AuthMiddleware(["socio"]), "GET");
-    $group -> get('/puesto/{puesto}', \UsuarioController::class . ':TraerPorPuesto') -> add(new AuthMiddleware(["socio"]), "GET");;
+    $group -> get('/puesto/{puesto}', \UsuarioController::class . ':TraerPorPuesto') -> add(new AuthMiddleware(["socio"]), "GET");
+    $group -> delete('/{dni}', \UsuarioController::class . ':BorrarUno');
 });
 #endregion
 #region Productos
@@ -50,6 +52,7 @@ $app -> group('/productos', function (RouteCollectorProxy $group) {
     $group -> post('[/]', \ProductoController::class . ':CargarUno') -> add(new AuthMiddleware(["socio"], "POST"));
     $group -> get('[/]', \ProductoController::class . ':TraerTodos');
     $group -> get('/{id}', \ProductoController::class . ':TraerUno');
+    $group -> delete('/{id}', \ProductoController::class . ':BorrarUno');
 });
 #endregion
 #region Pedidos

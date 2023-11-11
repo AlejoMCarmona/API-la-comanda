@@ -51,8 +51,21 @@ class MesaController implements IApiUsable {
         return $response->withHeader('Content-Type', 'application/json');
     }
 
-	public function BorrarUno($request, $response, $args) {
-        return;
+    public function BorrarUno($request, $response, $args) {
+        if (Validadores::ValidarParametros($args, ["codigoIdentificacion"])) {
+            $resultado = Mesa::Borrar($args["codigoIdentificacion"]);
+
+            if ($resultado) {
+                $payload = json_encode(array("Resultado" => "Se ha dado de baja la mesa con el codigo de identificacion {$args["codigoIdentificacion"]}"));
+            } else {
+                $payload = json_encode(array("ERROR" => "No se pudo encontrar una mesa con el codigo de identificacion {$args["codigoIdentificacion"]}"));
+            }
+        } else {
+            $payload = json_encode(array("ERROR" => "El parámetro 'id' es obligatorio para dar de baja una mesa"));
+        }
+
+        $response->getBody() -> write($payload);
+        return $response -> withHeader('Content-Type', 'application/json');
     }
 
 	public function ModificarUno($request, $response, $args) {
