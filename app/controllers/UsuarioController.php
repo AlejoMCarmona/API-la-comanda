@@ -68,7 +68,20 @@ class UsuarioController implements IApiUsable {
     }
 
     public function TraerUno($request, $response, $args) {
-        return;
+        if (Validadores::ValidarParametros($args, ["dni"])) {
+            $usuario = Usuario::ObtenerPorDNI($args["dni"]);
+
+            if ($usuario) {
+                $payload = json_encode(array("Usuario" => $usuario));
+            } else {
+                $payload = json_encode(array("ERROR" => "No se pudo encontrar un usuario con el DNI {$args["dni"]}"));
+            }
+        } else {
+            $payload = json_encode(array("ERROR" => "El parámetro 'dni' es obligatorio para obtener un usuario"));
+        }
+
+        $response->getBody()->write($payload);
+        return $response->withHeader('Content-Type', 'application/json');
     }
 
 	public function BorrarUno($request, $response, $args) {

@@ -44,7 +44,7 @@ class AuthMiddleware {
             $payload = json_encode(array('ERROR' => 'No posees ningun rol para realizar esta acción'));
             $response = new Response();
             $response -> getBody() -> write($payload);          
-        }       
+        }
 
         return $response -> withHeader('Content-Type', 'application/json');
     }

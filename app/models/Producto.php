@@ -57,7 +57,7 @@ class Producto {
         return $retorno;
     }
 
-    public static function ObtenerProducto($id) {
+    public static function ObtenerPorID($id) {
         $retorno = false;
         $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
         $consulta = $objetoAccesoDatos -> PrepararConsulta("SELECT * FROM productos WHERE id = :id");

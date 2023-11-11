@@ -81,11 +81,11 @@ class Usuario {
         return $retorno;
     }
 
-    public static function ObtenerUsuario($id) {
+    public static function ObtenerPorDNI($dni) {
         $retorno = false;
         $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
-        $consulta = $objetoAccesoDatos -> PrepararConsulta("SELECT * FROM usuarios WHERE id = :id");
-        $consulta -> bindParam(':id', $id);
+        $consulta = $objetoAccesoDatos -> PrepararConsulta("SELECT * FROM usuarios WHERE dni = :dni");
+        $consulta -> bindParam(':dni', $dni);
         $resultado = $consulta -> execute();
         if ($resultado && $consulta -> rowCount() > 0) {
             $retorno = $consulta -> fetchObject('Usuario');

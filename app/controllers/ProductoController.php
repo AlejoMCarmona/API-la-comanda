@@ -40,7 +40,20 @@ class ProductoController implements IApiUsable {
     }
 
     public function TraerUno($request, $response, $args) {
-        return;
+        if (Validadores::ValidarParametros($args, ["id"])) {
+            $producto = Producto::ObtenerPorId($args["id"]);
+
+            if ($producto) {
+                $payload = json_encode(array("Producto" => $producto));
+            } else {
+                $payload = json_encode(array("ERROR" => "No se pudo encontrar un producto con el ID {$args["id"]}"));
+            }
+        } else {
+            $payload = json_encode(array("ERROR" => "El parámetro 'id' es obligatorio para obtener un producto"));
+        }
+
+        $response ->getBody()-> write($payload);
+        return $response -> withHeader('Content-Type', 'application/json');
     }
 
 	public function BorrarUno($request, $response, $args) {

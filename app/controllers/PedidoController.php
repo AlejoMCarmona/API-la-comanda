@@ -11,7 +11,7 @@ class PedidoController implements IApiUsable {
 
         if (Validadores::ValidarParametros($parametros, [ "codigoMesa", "idProducto", "nombreCliente" ])) {
             $mesa = Mesa::ObtenerPorCodigoIdentificacion($parametros["codigoMesa"]);
-            if ($mesa != false && Producto::ObtenerProducto($parametros["idProducto"]) != false) {
+            if ($mesa != false && Producto::ObtenerPorID($parametros["idProducto"]) != false) {
                 $codigoIdentificacion = "";
                 if ($mesa -> estado != "cerrada") {
                     $codigoIdentificacion = Pedido::ObtenerUltimoPedidoPorMesa($parametros['codigoMesa']) -> codigoIdentificacion;
@@ -117,7 +117,7 @@ class PedidoController implements IApiUsable {
 
         if (Validadores::ValidarParametros($parametros, ["id"])) {
             $payload = json_encode(array("ERROR" => "Hubo un error al cambiar el estado"));
-            $pedido = Pedido::ObtenerPedidoPorID($parametros["id"]);
+            $pedido = Pedido::ObtenerPorID($parametros["id"]);
             if ($pedido) {
                 $nuevoEstado = false;
                 $tiempoPreparacion = "";
@@ -152,12 +152,12 @@ class PedidoController implements IApiUsable {
 
     public function TraerUno($request, $response, $args) {
         if (Validadores::ValidarParametros($args, ["id"])) {
-            $pedido = Pedido::ObtenerPedidoPorID($args["id"]);
+            $pedido = Pedido::ObtenerPorID($args["id"]);
 
             if ($pedido) {
                 $payload = json_encode(array("Pedido" => $pedido));
             } else {
-                $payload = json_encode(array("ERROR" => "Hubo un error al obtener el pedido"));
+                $payload = json_encode(array("ERROR" => "No se pudo encontrar una mesa con el id {$args["id"]}"));
             }
         } else {
             $payload = json_encode(array("ERROR" => "El parámetro 'id' es obligatorio para traer un pedido"));

@@ -35,7 +35,20 @@ class MesaController implements IApiUsable {
     }
 
     public function TraerUno($request, $response, $args) {
-        return;
+        if (Validadores::ValidarParametros($args, [ "codigoMesa" ])) {
+            $mesa = Mesa::ObtenerPorCodigoIdentificacion($args["codigoMesa"]);
+
+            if ($mesa) {
+                $payload = json_encode(array("Mesa" => $mesa));
+            } else {
+                $payload = json_encode(array("ERROR" => "No se pudo encontrar una mesa con el código {$args["codigoMesa"]}"));
+            }
+        } else {
+            $payload = json_encode(array("ERROR" => "El parámetro 'codigoMesa' es obligatorio para obtener una mesa"));
+        }
+
+        $response -> getBody() -> write($payload);
+        return $response->withHeader('Content-Type', 'application/json');
     }
 
 	public function BorrarUno($request, $response, $args) {

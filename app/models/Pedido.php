@@ -61,7 +61,7 @@ class Pedido {
         return $retorno;
     }
 
-    public static function ObtenerPedidoPorID($id) {
+    public static function ObtenerPorID($id) {
         $retorno = false;
         $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
         $consulta = $objetoAccesoDatos -> PrepararConsulta("SELECT * FROM pedidos WHERE id = :id");
