@@ -92,7 +92,7 @@ class PedidoController implements IApiUsable {
         }
 
         $response -> getBody() -> write($payload);
-        return $response->withHeader('Content-Type', 'application/json');
+        return $response -> withHeader('Content-Type', 'application/json');
     }
 
     public function TraerPedidosPorSector($request, $response, $args) {
@@ -109,7 +109,7 @@ class PedidoController implements IApiUsable {
         }
         
         $response -> getBody() -> write($payload);
-        return $response->withHeader('Content-Type', 'application/json');
+        return $response -> withHeader('Content-Type', 'application/json');
     }
 
     public function CambiarEstado($request, $response, $args) {
@@ -168,11 +168,31 @@ class PedidoController implements IApiUsable {
     }
 
 	public function BorrarUno($request, $response, $args) {
-        return;
+        return; // No puedo borrar un pedido
     }
 
 	public function ModificarUno($request, $response, $args) {
-        return;
+        $parametros = $request -> getParsedBody ();
+
+        if (Validadores::ValidarParametros($parametros, [ "id", "idProducto", "nombreCliente" ])) {
+            $pedido = Pedido::ObtenerPorID($parametros["id"]);
+            if ($pedido && Producto::ObtenerPorID($parametros["idProducto"])) {
+                $pedido -> idProducto = $parametros["idProducto"];
+                $pedido -> nombreCliente = $parametros["nombreCliente"];
+                if ($pedido -> Modificar()) {
+                    $payload = json_encode(array("Pedido modificado:" => $pedido));
+                } else {
+                    $payload = json_encode(array("ERROR" => "No se pudo modificar el pedido"));
+                }
+            } else {
+                $payload = json_encode(array("ERROR" => "Tanto el pedido como el producto deben existir para realizar la modificación"));
+            }
+        } else {
+            $payload = json_encode(array("ERROR" => "El parámetro 'id' es obligatorio para modificar un pedido"));
+        }
+        
+        $response -> getBody() -> write($payload);
+        return $response->withHeader('Content-Type', 'application/json');
     }
 
     private static function SubirFotoMesa($codigoIdentificacion, $fotoMesa) {

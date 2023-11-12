@@ -93,6 +93,18 @@ class Usuario {
         return $retorno;
     }
 
+    public static function ObtenerPorID($id) {
+        $retorno = false;
+        $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
+        $consulta = $objetoAccesoDatos -> PrepararConsulta("SELECT * FROM usuarios WHERE id = :id");
+        $consulta -> bindParam(':id', $id);
+        $resultado = $consulta -> execute();
+        if ($resultado && $consulta -> rowCount() > 0) {
+            $retorno = $consulta -> fetchObject('Usuario');
+        }
+        return $retorno;
+    }
+
     public static function ObtenerUsuariosPorPuesto($puesto) {
         $retorno = false;
         $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
@@ -130,6 +142,32 @@ class Usuario {
         $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
         $consulta = $objetoAccesoDatos -> PrepararConsulta("UPDATE usuarios SET activo = FALSE WHERE dni = :dni");
         $consulta -> bindParam(':dni', $dni);
+        $resultado = $consulta -> execute();
+
+        if ($resultado) {
+            $retorno = true;
+        }
+
+        return $retorno;
+    }
+
+    public function Modificar() {
+        $retorno = false;
+        $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
+        $query = "";
+        if ($this -> sector == NULL) {
+            $query = "UPDATE usuarios SET nombre = :nombre, apellido = :apellido, dni = :dni, email = :email, puesto = :puesto WHERE id = :id";
+        } else {
+            $query = "UPDATE usuarios SET nombre = :nombre, apellido = :apellido, dni = :dni, email = :email, puesto = :puesto, sector = :sector WHERE id = :id";
+        }
+        $consulta = $objetoAccesoDatos -> PrepararConsulta($query);
+        $consulta -> bindParam(':id', $this -> id);
+        $consulta -> bindParam(':nombre', $this -> nombre);
+        $consulta -> bindParam(':apellido', $this -> apellido);
+        $consulta -> bindParam(':dni', $this -> dni);
+        $consulta -> bindParam(':email', $this -> email);
+        $consulta -> bindParam(':puesto', $this -> puesto);
+        if ($this -> sector != NULL) $consulta -> bindParam(':sector', $this -> sector);
         $resultado = $consulta -> execute();
 
         if ($resultado) {

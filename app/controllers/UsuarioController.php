@@ -14,9 +14,9 @@ class UsuarioController implements IApiUsable {
         } else {
             $resultado = false;
     
-            if ($parametros["puesto"] != 'mozo') {
+            if ($parametros["puesto"] != 'mozo' && $parametros["puesto"] != 'socio') {
                 if (!Validadores::ValidarParametros($parametros, ["sector"])) {
-                    $payload = json_encode(array("ERROR" => "Se debe especificar un sector si el empleado no es un mozo"));
+                    $payload = json_encode(array("ERROR" => "Se debe especificar un sector si el empleado no es un mozo ni un socio"));
                 } else {
                     $usuario = new Usuario($parametros['nombre'], $parametros['apellido'], $parametros['dni'], $parametros['email'], $parametros['clave'], $parametros['puesto'], $parametros['sector']);
                     $resultado = $usuario -> CrearUsuario();
@@ -101,8 +101,45 @@ class UsuarioController implements IApiUsable {
         return $response->withHeader('Content-Type', 'application/json');
     }
 
+
 	public function ModificarUno($request, $response, $args) {
-        return;
+        $parametros = $request -> getParsedBody ();
+
+        if (Validadores::ValidarParametros($parametros, ["id", "nombre", "apellido", "dni", "email", "puesto"])) {
+            $usuario = Usuario::ObtenerPorID($parametros["id"]);
+            if ($usuario) {
+                $nuevoPuestoUsuario = $parametros["puesto"];
+                if ($nuevoPuestoUsuario == 'mozo' || $nuevoPuestoUsuario == 'socio') {
+                    $usuario -> sector = NULL;
+                } else if ($nuevoPuestoUsuario != 'mozo' && $nuevoPuestoUsuario != 'socio') {
+                    if (Validadores::ValidarParametros($parametros, ["sector"])) {
+                        $usuario -> sector = $parametros["sector"];
+                    } else {
+                        $payload = json_encode(array("ERROR" => "Se debe especificar un sector si el empleado no es un mozo o un socio"));
+                    }
+                }
+
+                if (!isset($payload)) {
+                    $usuario -> nombre = $parametros["nombre"];                
+                    $usuario -> apellido = $parametros["apellido"];                
+                    $usuario -> dni = $parametros["dni"];                
+                    $usuario -> email = $parametros["email"];                
+                    $usuario -> puesto = $parametros["puesto"];
+                    if ($usuario -> Modificar()) {
+                        $payload = json_encode(array("Usuario modificado:" => $usuario));
+                    } else {
+                        $payload = json_encode(array("ERROR" => "No se pudo modificar el usuario"));
+                    }
+                }
+            } else {
+                $payload = json_encode(array("ERROR" => "No se pudo encontrar al usuario para realizar la modificación"));
+            }
+        } else {
+            $payload = json_encode(array("ERROR" => "El parámetro 'id', 'nombre', 'apellido', 'dni', 'email' y 'puesto' son obligatorios para modificar un usuario"));
+        }
+        
+        $response -> getBody() -> write($payload);
+        return $response -> withHeader('Content-Type', 'application/json');
     }
 
     public function IniciarSesion($request, $response, $args) {

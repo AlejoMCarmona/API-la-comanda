@@ -74,7 +74,28 @@ class ProductoController implements IApiUsable {
     }
 
 	public function ModificarUno($request, $response, $args) {
-        return;
+        $parametros = $request -> getParsedBody ();
+        var_dump($parametros);
+        if (Validadores::ValidarParametros($parametros, [ "id", "tipo", "sector", "precio" ])) {
+            $producto = Producto::ObtenerPorID($parametros["id"]);
+            if ($producto) {
+                $producto -> tipo = $parametros["tipo"];
+                $producto -> sector = $parametros["sector"];
+                $producto -> precio = $parametros["precio"];
+                if ($producto -> Modificar()) {
+                    $payload = json_encode(array("producto modificado:" => $producto));
+                } else {
+                    $payload = json_encode(array("ERROR" => "No se pudo modificar el producto"));
+                }
+            } else {
+                $payload = json_encode(array("ERROR" => "No se pudo encontrar el producto para realizar la modificación"));
+            }
+        } else {
+            $payload = json_encode(array("ERROR" => "Los parámetros 'id', 'tipo', 'sector' y 'precio' son obligatorios para modificar un producto"));
+        }
+        
+        $response -> getBody() -> write($payload);
+        return $response->withHeader('Content-Type', 'application/json');
     }
 }
 

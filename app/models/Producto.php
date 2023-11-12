@@ -80,6 +80,23 @@ class Producto {
         }
         return $retorno;
     }
+
+    public function Modificar() {
+        $retorno = false;
+        $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
+        $consulta = $objetoAccesoDatos -> PrepararConsulta("UPDATE productos SET tipo = :tipo, sector = :sector, precio = :precio WHERE id = :id");
+        $consulta -> bindParam(':id', $this -> id);
+        $consulta -> bindParam(':tipo', $this -> tipo);
+        $consulta -> bindParam(':sector', $this -> sector);
+        $consulta -> bindParam(':precio', $this -> precio);
+        $resultado = $consulta -> execute();
+
+        if ($resultado) {
+            $retorno = true;
+        }
+
+        return $retorno;
+    }
 }
 
 ?>

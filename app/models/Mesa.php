@@ -6,6 +6,7 @@ class Mesa {
     public $id;
     public $estado;
     public $codigoIdentificacion;
+    public $asientos;
     public $fechaCreacion;
 
     public function __construct() {
@@ -17,22 +18,24 @@ class Mesa {
         }
     }
 
-    public function __construct4($id, $estado, $codigoIdentificacion, $fecha) {
+    public function __construct5($id, $estado, $codigoIdentificacion, $asientos, $fecha) {
         $this -> id = $id;
         $this -> estado = $estado;
         $this -> codigoIdentificacion = $codigoIdentificacion;
+        $this -> asientos = $asientos;
         $this -> fecha = $fecha;
     }
 
-    public function __construct1($codigoIdentificacion) {
-        $this -> __construct4(0, "", $codigoIdentificacion, "");
+    public function __construct2($codigoIdentificacion, $asientos) {
+        $this -> __construct5(0, "", $codigoIdentificacion, $asientos, "");
     }
 
     public function CrearMesa() {
         $retorno = false;
         $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
-        $consulta = $objetoAccesoDatos -> PrepararConsulta("INSERT INTO MESAS (codigoIdentificacion) VALUES (:codigoIdentificacion)");
+        $consulta = $objetoAccesoDatos -> PrepararConsulta("INSERT INTO MESAS (codigoIdentificacion, asientos) VALUES (:codigoIdentificacion, :asientos)");
         $consulta -> bindParam(":codigoIdentificacion", $this -> codigoIdentificacion);
+        $consulta -> bindParam(":asientos", $this -> asientos);
         $resultado = $consulta -> execute();
         if ($resultado) {
             $retorno = $objetoAccesoDatos -> ObtenerUltimoId();
@@ -51,7 +54,7 @@ class Mesa {
         return $retorno;
     }
 
-    public static function ObtenerMesa($id) {
+    public static function ObtenerPorID($id) {
         $retorno = false;
         $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
         $consulta = $objetoAccesoDatos -> PrepararConsulta("SELECT * FROM mesas WHERE id = :id");
@@ -90,9 +93,24 @@ class Mesa {
     public static function Borrar($codigoIdentificacion) {
         $retorno = false;
         $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
-        $consulta = $objetoAccesoDatos->PrepararConsulta("UPDATE mesas SET activa = FALSE WHERE codigoIdentificacion = :codigoIdentificacion");
-        $consulta->bindParam(':codigoIdentificacion', $codigoIdentificacion);
-        $resultado = $consulta->execute();
+        $consulta = $objetoAccesoDatos -> PrepararConsulta("UPDATE mesas SET activa = FALSE WHERE codigoIdentificacion = :codigoIdentificacion");
+        $consulta -> bindParam(':codigoIdentificacion', $codigoIdentificacion);
+        $resultado = $consulta -> execute();
+
+        if ($resultado) {
+            $retorno = true;
+        }
+
+        return $retorno;
+    }
+
+    public function Modificar() {
+        $retorno = false;
+        $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
+        $consulta = $objetoAccesoDatos -> PrepararConsulta("UPDATE mesas SET asientos = :asientos WHERE id = :id");
+        $consulta -> bindParam(':id', $id);
+        $consulta -> bindParam(':asientos', $this -> asientos);
+        $resultado = $consulta -> execute();
 
         if ($resultado) {
             $retorno = true;

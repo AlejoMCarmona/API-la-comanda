@@ -6,21 +6,13 @@ use Slim\Psr7\Response;
 
 class AuthMiddleware {
     private $puestosValidos;
-    private $metodo;
     
-    public function __construct($puestosValidos, $metodo = "GET") {
+    public function __construct($puestosValidos) {
         $this -> puestosValidos = $puestosValidos;
-        $this -> metodo = $metodo;
     }
 
     public function __invoke(Request $request, RequestHandler $handler): Response {
-
-        // Tengo que diferenciar entre "GET" y "POST" debido a que los parámetros se obtienen de diferentes maneras
-        if ($this -> metodo === "GET") {
-            $parametros = $request -> getQueryParams();
-        } else {
-            $parametros = $request -> getParsedBody();            
-        }
+        $parametros = $request -> getQueryParams();
 
         if (Validadores::ValidarParametros($parametros, [ "puesto" ])) {
             $puesto = $parametros["puesto"];

@@ -37,7 +37,7 @@ class Pedido {
     public function CrearPedido() {
         $retorno = false;
         $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
-        $consulta = $objetoAccesoDatos -> PrepararConsulta("INSERT INTO Pedidos (codigoMesa, idProducto, nombreCliente, codigoIdentificacion) VALUES (:codigoMesa, :idProducto, :nombreCliente, :codigoIdentificacion)");
+        $consulta = $objetoAccesoDatos -> PrepararConsulta("INSERT INTO pedidos (codigoMesa, idProducto, nombreCliente, codigoIdentificacion) VALUES (:codigoMesa, :idProducto, :nombreCliente, :codigoIdentificacion)");
         $consulta -> bindParam(':codigoMesa', $this -> codigoMesa);
         $consulta -> bindParam(':idProducto', $this -> idProducto);
         $consulta -> bindParam(':nombreCliente', $this -> nombreCliente);
@@ -49,6 +49,22 @@ class Pedido {
         }
         return $retorno;
     }
+
+    public function Modificar() {
+        $retorno = false;
+        $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
+        $consulta = $objetoAccesoDatos -> PrepararConsulta("UPDATE pedidos SET idProducto = :idProducto, nombreCliente = :nombreCliente WHERE id = :id");
+        $consulta -> bindParam(':id', $this -> id);
+        $consulta -> bindParam(':idProducto', $this -> idProducto);
+        $consulta -> bindParam(':nombreCliente', $this -> nombreCliente);
+
+        $resultado = $consulta -> execute();
+        if ($resultado) {
+            $retorno = true;
+        }
+        return $retorno;
+    }
+
 
     public static function ObtenerTodosLosPedidos() {
         $retorno = false;
