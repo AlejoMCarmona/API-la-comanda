@@ -11,6 +11,7 @@ require_once './controllers/MesaController.php';
 require_once './controllers/UsuarioController.php';
 require_once './controllers/ProductoController.php';
 require_once './controllers/PedidoController.php';
+require_once './controllers/EncuestaController.php';
 #endregion
 #region Middlewares
 require_once './Middlewares/AuthMiddleware.php';
@@ -70,6 +71,12 @@ $app ->group('/pedidos', function (RouteCollectorProxy $group) {
     $group -> post('[/]', \PedidoController::class . ':CargarUno') -> add(new AuthMiddleware(["mozo"]));
     $group -> post('/cambioEstado', \PedidoController::class . ':CambiarEstado') -> add(new AuthMiddleware(["cocinero","cervecero","bartender"]));
     $group -> put('[/]', \PedidoController::class . ':ModificarUno') -> add(new AuthMiddleware(["mozo","socio"]));
+});
+#endregion
+#region Encuestas
+$app ->group('/encuestas', function (RouteCollectorProxy $group) {
+    $group -> get('[/]', \EncuestaController::class . ':TraerTodos');
+    $group -> post('[/]', \EncuestaController::class . ':CargarUno');
 });
 #endregion
 #endregion
