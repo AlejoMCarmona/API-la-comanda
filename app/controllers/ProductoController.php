@@ -27,7 +27,7 @@ class ProductoController implements IApiUsable {
     }
 
     public function TraerTodos($request, $response, $args) {
-        $lista = Producto::ObtenerTodosLosProductos();
+        $lista = Producto::ObtenerTodosLosProductos(true); // TODO: verificar
 
         if (is_array($lista)) {
             $payload = json_encode(array("Lista" => $lista));
@@ -41,7 +41,7 @@ class ProductoController implements IApiUsable {
 
     public function TraerUno($request, $response, $args) {
         if (Validadores::ValidarParametros($args, ["id"])) {
-            $producto = Producto::ObtenerPorId($args["id"]);
+            $producto = Producto::ObtenerPorID($args["id"], true); // TODO: verificar
 
             if ($producto) {
                 $payload = json_encode(array("Producto" => $producto));
@@ -75,9 +75,8 @@ class ProductoController implements IApiUsable {
 
 	public function ModificarUno($request, $response, $args) {
         $parametros = $request -> getParsedBody ();
-        var_dump($parametros);
         if (Validadores::ValidarParametros($parametros, [ "id", "tipo", "sector", "precio" ])) {
-            $producto = Producto::ObtenerPorID($parametros["id"]);
+            $producto = Producto::ObtenerPorID($parametros["id"], true);  // TODO: verificar
             if ($producto) {
                 $producto -> tipo = $parametros["tipo"];
                 $producto -> sector = $parametros["sector"];

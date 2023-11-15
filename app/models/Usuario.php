@@ -9,7 +9,7 @@ class Usuario {
     public $dni;
     public $email;
     public $clave;
-    public $estado;
+    public $activo;
     public $puesto;
     public $sector;
     public $fechaAlta;
@@ -23,21 +23,20 @@ class Usuario {
         }
     }
 
-    public function __construct10($id, $nombre, $apellido, $dni, $email, $clave, $estado, $puesto, $sector, $fechaAlta) {
+    public function __construct10($id, $nombre, $apellido, $dni, $email, $clave, $puesto, $sector, $activo, $fechaAlta) {
         $this -> id = $id;
         $this -> nombre = $nombre;
         $this -> apellido = $apellido;
         $this -> dni = $dni;
         $this -> email = $email;
         $this -> clave = $clave;
-        $this -> estado = $estado;
         $this -> puesto = $puesto;
         $this -> sector = $sector;
         $this -> fechaAlta = $fechaAlta;
     }
 
     public function __construct7($nombre, $apellido, $dni, $email, $clave, $puesto, $sector) {
-        $this -> __construct10(0, $nombre, $apellido, $dni, $email, $clave, "", $puesto, $sector, "");
+        $this -> __construct10(0, $nombre, $apellido, $dni, $email, $clave, $puesto, true, $sector, "");
     }
 
     public function __construct6($nombre, $apellido, $dni, $email, $clave, $puesto) {
@@ -70,10 +69,15 @@ class Usuario {
         return $retorno;
     }
 
-    public static function ObtenerTodosLosUsuarios() {
+    public static function ObtenerTodosLosUsuarios($soloActivos = false) {
         $retorno = false;
         $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
-        $consulta = $objetoAccesoDatos -> PrepararConsulta("SELECT * FROM usuarios");
+        if ($soloActivos) {
+            $query = "SELECT * FROM usuarios WHERE activo = TRUE";
+        } else {
+            $query = "SELECT * FROM usuarios";
+        }
+        $consulta = $objetoAccesoDatos -> PrepararConsulta($query);
         $resultado = $consulta -> execute();
         if ($resultado) {
             $retorno = $consulta -> fetchAll(PDO::FETCH_CLASS, 'Usuario');
@@ -81,10 +85,15 @@ class Usuario {
         return $retorno;
     }
 
-    public static function ObtenerPorDNI($dni) {
+    public static function ObtenerPorDNI($dni, $soloActivo = false) {
         $retorno = false;
         $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
-        $consulta = $objetoAccesoDatos -> PrepararConsulta("SELECT * FROM usuarios WHERE dni = :dni");
+        if ($soloActivo) {
+            $query = "SELECT * FROM usuarios WHERE dni = :dni AND activo = TRUE";
+        } else {
+            $query = "SELECT * FROM usuarios WHERE dni = :dni";
+        }
+        $consulta = $objetoAccesoDatos -> PrepararConsulta($query);
         $consulta -> bindParam(':dni', $dni);
         $resultado = $consulta -> execute();
         if ($resultado && $consulta -> rowCount() > 0) {
@@ -93,10 +102,15 @@ class Usuario {
         return $retorno;
     }
 
-    public static function ObtenerPorID($id) {
+    public static function ObtenerPorID($id, $soloActivo = false) {
         $retorno = false;
         $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
-        $consulta = $objetoAccesoDatos -> PrepararConsulta("SELECT * FROM usuarios WHERE id = :id");
+        if ($soloActivo) {
+            $query = "SELECT * FROM usuarios WHERE id = :id AND activo = TRUE";
+        } else {
+            $query = "SELECT * FROM usuarios WHERE id = :id";
+        }
+        $consulta = $objetoAccesoDatos -> PrepararConsulta($query);
         $consulta -> bindParam(':id', $id);
         $resultado = $consulta -> execute();
         if ($resultado && $consulta -> rowCount() > 0) {
@@ -105,10 +119,15 @@ class Usuario {
         return $retorno;
     }
 
-    public static function ObtenerUsuariosPorPuesto($puesto) {
+    public static function ObtenerUsuariosPorPuesto($puesto, $soloActivos = false) {
         $retorno = false;
         $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
-        $consulta = $objetoAccesoDatos -> PrepararConsulta("SELECT * FROM usuarios WHERE puesto = :puesto");
+        if ($soloActivos) {
+            $query = "SELECT * FROM usuarios WHERE activo = TRUE AND puesto = :puesto";
+        } else {
+            $query = "SELECT * FROM usuarios WHERE puesto = :puesto";
+        }
+        $consulta = $objetoAccesoDatos -> PrepararConsulta($query);
         $consulta -> bindParam(':puesto', $puesto);
         $resultado = $consulta -> execute();
         if ($resultado && $consulta -> rowCount() > 0) {
@@ -120,7 +139,7 @@ class Usuario {
     public static function IniciarSesion($email, $clave) {
         $retorno = false;
         $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
-        $consulta = $objetoAccesoDatos -> PrepararConsulta("SELECT * FROM usuarios WHERE email = :email");
+        $consulta = $objetoAccesoDatos -> PrepararConsulta("SELECT * FROM usuarios WHERE email = :email AND activo = TRUE");
         $consulta -> bindParam(':email', $email);
         $resultado = $consulta -> execute();
 
@@ -132,7 +151,7 @@ class Usuario {
                 $retorno = "La contraseña es incorrecta";
             }
         } else {
-            $retorno = "El email no se encuentra registrado";
+            $retorno = "El email no se encuentra registrado o el usuario fue dado de baja";
         }
         return $retorno;
     }
@@ -154,7 +173,6 @@ class Usuario {
     public function Modificar() {
         $retorno = false;
         $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
-        $query = "";
         if ($this -> sector == NULL) {
             $query = "UPDATE usuarios SET nombre = :nombre, apellido = :apellido, dni = :dni, email = :email, puesto = :puesto WHERE id = :id";
         } else {

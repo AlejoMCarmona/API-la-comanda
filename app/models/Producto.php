@@ -46,10 +46,15 @@ class Producto {
         return $retorno;
     }
 
-    public static function ObtenerTodosLosProductos() {
+    public static function ObtenerTodosLosProductos($soloActivos = false) {
         $retorno = false;
         $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
-        $consulta = $objetoAccesoDatos -> PrepararConsulta("SELECT * FROM Productos");
+        if ($soloActivos) {
+            $query = "SELECT * FROM Productos WHERE activo = TRUE";
+        } else {
+            $query = "SELECT * FROM Productos";
+        }
+        $consulta = $objetoAccesoDatos -> PrepararConsulta($query);
         $resultado = $consulta->execute();
         if ($resultado) {
             $retorno = $consulta->fetchAll(PDO::FETCH_CLASS, 'Producto');
@@ -57,10 +62,15 @@ class Producto {
         return $retorno;
     }
 
-    public static function ObtenerPorID($id) {
+    public static function ObtenerPorID($id, $soloActivos = false) {
         $retorno = false;
         $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
-        $consulta = $objetoAccesoDatos -> PrepararConsulta("SELECT * FROM productos WHERE id = :id");
+        if ($soloActivos) {
+            $query = "SELECT * FROM Productos WHERE activo = TRUE AND id = :id";
+        } else {
+            $query = "SELECT * FROM productos WHERE id = :id";
+        }
+        $consulta = $objetoAccesoDatos -> PrepararConsulta($query);
         $consulta -> bindParam(':id', $id);
         $resultado = $consulta -> execute();
         if ($resultado) {

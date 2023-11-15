@@ -43,10 +43,15 @@ class Mesa {
         return $retorno;
     }
 
-    public static function ObtenerTodasLasMesas() {
+    public static function ObtenerTodasLasMesas($soloActivas = false) {
         $retorno = false;
         $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
-        $consulta = $objetoAccesoDatos -> PrepararConsulta("SELECT * FROM MESAS");
+        if ($soloActivas) {
+            $query = "SELECT * FROM MESAS WHERE activa = TRUE";
+        } else {
+            $query = "SELECT * FROM MESAS";
+        }
+        $consulta = $objetoAccesoDatos -> PrepararConsulta($query);
         $resultado = $consulta -> execute();
         if ($resultado) {
             $retorno = $consulta -> fetchAll(PDO::FETCH_CLASS, 'Mesa');
@@ -54,10 +59,15 @@ class Mesa {
         return $retorno;
     }
 
-    public static function ObtenerPorID($id) {
+    public static function ObtenerPorID($id, $soloActiva = false) {
         $retorno = false;
         $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
-        $consulta = $objetoAccesoDatos -> PrepararConsulta("SELECT * FROM mesas WHERE id = :id");
+        if ($soloActiva) {
+            $query = "SELECT * FROM mesas WHERE id = :id AND activa = TRUE";
+        } else {
+            $query = "SELECT * FROM mesas WHERE id = :id";
+        }
+        $consulta = $objetoAccesoDatos -> PrepararConsulta($query);
         $consulta -> bindParam(':id', $id);
         $resultado = $consulta -> execute();
         if ($resultado) {
@@ -66,10 +76,15 @@ class Mesa {
         return $retorno;
     }
 
-    public static function ObtenerPorCodigoIdentificacion($codigoIdentificacion) {
+    public static function ObtenerPorCodigoIdentificacion($codigoIdentificacion, $soloActivas = false) {
         $retorno = false;
         $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
-        $consulta = $objetoAccesoDatos -> PrepararConsulta("SELECT * FROM mesas WHERE codigoIdentificacion = :codigoIdentificacion");
+        if ($soloActivas) {
+            $query = "SELECT * FROM mesas WHERE codigoIdentificacion = :codigoIdentificacion AND activa = TRUE";
+        } else {
+            $query = "SELECT * FROM mesas WHERE codigoIdentificacion = :codigoIdentificacion";
+        }
+        $consulta = $objetoAccesoDatos -> PrepararConsulta($query);
         $consulta -> bindParam(':codigoIdentificacion', $codigoIdentificacion);
         $resultado = $consulta -> execute();
         if ($resultado) {

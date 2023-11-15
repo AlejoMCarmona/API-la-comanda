@@ -10,7 +10,7 @@ class MesaController implements IApiUsable {
         $parametros = $request -> getParsedBody();
         if (Validadores::ValidarParametros($parametros, [ "asientos" ])) {
             $codigoIdentificacion = Validadores::GenerarNumeroAlfanumericoIdentificacion(5, "Mesa");
-            $mesa = new Mesa($codigoIdentificacion, $parametros["asientos"]); 
+            $mesa = new Mesa($codigoIdentificacion, $parametros["asientos"]);
             $resultado = $mesa -> CrearMesa();
             if (is_numeric($resultado)) {
                 $payload = json_encode(array("Resultado" => "Se ha creado con éxito una mesa con el ID {$resultado}"));
@@ -27,7 +27,7 @@ class MesaController implements IApiUsable {
     }
 
     public function TraerTodos($request, $response, $args) {
-        $lista = Mesa::ObtenerTodasLasMesas();
+        $lista = Mesa::ObtenerTodasLasMesas(true);
 
         if (is_array($lista)) {
             $payload = json_encode(array("Lista" => $lista));
@@ -41,7 +41,7 @@ class MesaController implements IApiUsable {
 
     public function TraerUno($request, $response, $args) {
         if (Validadores::ValidarParametros($args, [ "codigoMesa" ])) {
-            $mesa = Mesa::ObtenerPorCodigoIdentificacion($args["codigoMesa"]);
+            $mesa = Mesa::ObtenerPorCodigoIdentificacion($args["codigoMesa"], true);
 
             if ($mesa) {
                 $payload = json_encode(array("Mesa" => $mesa));
@@ -60,7 +60,7 @@ class MesaController implements IApiUsable {
         $parametros = $request -> getParsedBody();
         
         if (Validadores::ValidarParametros($parametros, [ "codigoMesa" ])) {
-            $mesa = Mesa::ObtenerPorCodigoIdentificacion($parametros["codigoMesa"]);
+            $mesa = Mesa::ObtenerPorCodigoIdentificacion($parametros["codigoMesa"], true);
             if ($mesa) {
                 $nuevoEstado = false;
                 switch($mesa -> estado) {
@@ -121,7 +121,7 @@ class MesaController implements IApiUsable {
 	public function ModificarUno($request, $response, $args) {
         $parametros = $request -> getParsedBody ();
         if (Validadores::ValidarParametros($parametros, [ "id", "asientos" ])) {
-            $mesa = Mesa::ObtenerPorID($parametros["id"]);
+            $mesa = Mesa::ObtenerPorID($parametros["id"], true);
             if ($mesa) {
                 $mesa -> asientos = $parametros["asientos"];
                 if ($mesa -> Modificar()) {

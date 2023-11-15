@@ -38,7 +38,7 @@ class UsuarioController implements IApiUsable {
     }
 
     public function TraerTodos($request, $response, $args) {
-        $lista = Usuario::ObtenerTodosLosUsuarios();
+        $lista = Usuario::ObtenerTodosLosUsuarios(true);
 
         if (is_array($lista)) {
             $payload = json_encode(array("Lista" => $lista));
@@ -52,7 +52,7 @@ class UsuarioController implements IApiUsable {
 
     public function TraerPorPuesto($request, $response, $args) {
         if (Validadores::ValidarParametros($args, [ "puesto" ])) {
-            $lista = Usuario::ObtenerUsuariosPorPuesto($args["puesto"]);
+            $lista = Usuario::ObtenerUsuariosPorPuesto($args["puesto"], true);
 
             if (is_array($lista)) {
                 $payload = json_encode(array("Lista" => $lista));
@@ -69,7 +69,7 @@ class UsuarioController implements IApiUsable {
 
     public function TraerUno($request, $response, $args) {
         if (Validadores::ValidarParametros($args, ["dni"])) {
-            $usuario = Usuario::ObtenerPorDNI($args["dni"]);
+            $usuario = Usuario::ObtenerPorDNI($args["dni"], true);
 
             if ($usuario) {
                 $payload = json_encode(array("Usuario" => $usuario));
@@ -106,7 +106,7 @@ class UsuarioController implements IApiUsable {
         $parametros = $request -> getParsedBody ();
 
         if (Validadores::ValidarParametros($parametros, ["id", "nombre", "apellido", "dni", "email", "puesto"])) {
-            $usuario = Usuario::ObtenerPorID($parametros["id"]);
+            $usuario = Usuario::ObtenerPorID($parametros["id"], true);
             if ($usuario) {
                 $nuevoPuestoUsuario = $parametros["puesto"];
                 if ($nuevoPuestoUsuario == 'mozo' || $nuevoPuestoUsuario == 'socio') {

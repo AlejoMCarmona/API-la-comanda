@@ -13,7 +13,7 @@ class EncuestaController {
             if (is_array($pedidos)) {
                 $codigoMesa = $pedidos[0] -> codigoMesa;
                 $mesa = Mesa::ObtenerPorCodigoIdentificacion($codigoMesa);
-                if ($mesa -> estado == 'con cliente pagando') {
+                if ($mesa && $mesa -> estado == 'con cliente pagando') {
                     $encuesta = new Encuesta($parametros["codigoPedido"], $parametros["puntuacionMesa"], $parametros["puntuacionRestaurante"], $parametros["puntuacionMozo"], $parametros["puntuacionCocinero"], $parametros["descripcionExperiencia"]); 
                     $resultado = $encuesta -> CrearEncuesta();
                     if (is_numeric($resultado)) {

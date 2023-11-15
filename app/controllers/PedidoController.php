@@ -10,12 +10,14 @@ class PedidoController implements IApiUsable {
         $parametros = $request -> getParsedBody();
 
         if (Validadores::ValidarParametros($parametros, [ "codigoMesa", "idProducto", "nombreCliente" ])) {
-            $mesa = Mesa::ObtenerPorCodigoIdentificacion($parametros["codigoMesa"]);
-            if ($mesa != false && Producto::ObtenerPorID($parametros["idProducto"]) != false) {
+            $mesa = Mesa::ObtenerPorCodigoIdentificacion($parametros["codigoMesa"], true);
+            $producto = Producto::ObtenerPorID($parametros["idProducto"], true);
+            if ($mesa && $producto) {
                 $codigoIdentificacion = "";
                 if ($mesa -> estado != "cerrada") {
                     $codigoIdentificacion = Pedido::ObtenerUltimoPedidoPorMesa($parametros['codigoMesa']) -> codigoIdentificacion;
                 } else {
+                    //TODO: cambiar
                     $codigoIdentificacion = Validadores::GenerarNumeroAlfanumericoIdentificacion(5, "Pedido");
                     $fotoMesa = $request -> getUploadedFiles()['foto'];
                     self::SubirFotoMesa($codigoIdentificacion, $fotoMesa);
@@ -31,7 +33,7 @@ class PedidoController implements IApiUsable {
                     $payload = json_encode(array("ERROR" => "Hubo un error durante la creación del pedido"));
                 }
             } else {
-                $payload = json_encode(array("ERROR" => "Tanto la mesa seleccionada, como el producto y el empleado, deben existir para realizar un pedido"));
+                $payload = json_encode(array("ERROR" => "Tanto la mesa seleccionada como el producto, deben existir y estar activos para realizar un pedido"));
             }
         } else {
             $payload = json_encode(array("ERROR" => "Los parámetros obligatorios para cargar un nuevo pedido son: nombre, codigoMesa, idProducto y idEmpleado"));
@@ -42,7 +44,7 @@ class PedidoController implements IApiUsable {
     }
 
     public function TraerTodos($request, $response, $args) {
-        $lista = Pedido::ObtenerTodosLosPedidos();
+        $lista = Pedido::ObtenerTodosLosPedidos(); // TODO: agregar el estado activo a los pedidos y modificar esta línea
 
         if (is_array($lista)) {
             $payload = json_encode(array("Lista" => $lista));
@@ -58,7 +60,7 @@ class PedidoController implements IApiUsable {
         $parametros = $request -> getParsedBody();
 
         if (Validadores::ValidarParametros($args, [ "codigoIdentificacion" ])) {
-            $lista = Pedido::ObtenerPorCodigoIdentificacion($args["codigoIdentificacion"]);
+            $lista = Pedido::ObtenerPorCodigoIdentificacion($args["codigoIdentificacion"]); // TODO: agregar el estado activo a los pedidos y modificar esta línea
 
             if (is_array($lista)) {
                 $payload = json_encode(array("Lista" => $lista));
@@ -75,7 +77,7 @@ class PedidoController implements IApiUsable {
 
     public function TraerTiempoEstimadoPedido($request, $response, $args) {
         if (Validadores::ValidarParametros($args, [ "codigoMesa", "idPedido" ])) {
-            $tiempo = Pedido::ObtenerTiempoRestantePorCodigoIdentificacion($args["codigoMesa"], $args["idPedido"]);
+            $tiempo = Pedido::ObtenerTiempoRestantePorCodigoIdentificacion($args["codigoMesa"], $args["idPedido"]); // TODO: agregar el estado activo a los pedidos y modificar esta línea
 
             if (is_numeric($tiempo)) {
                 $mensaje = "Faltan {$tiempo} minutos para tener tu pedido";
@@ -97,7 +99,7 @@ class PedidoController implements IApiUsable {
 
     public function TraerPedidosPorSector($request, $response, $args) {
         if (Validadores::ValidarParametros($args, [ "sector" ])) {
-            $lista = Pedido::ObtenerPedidosPorSector($args["sector"]);
+            $lista = Pedido::ObtenerPedidosPorSector($args["sector"]); // TODO: agregar el estado activo a los pedidos y modificar esta línea
 
             if (is_array($lista)) {
                 $payload = json_encode(array("Lista" => $lista));
@@ -117,7 +119,7 @@ class PedidoController implements IApiUsable {
 
         if (Validadores::ValidarParametros($parametros, ["id"])) {
             $payload = json_encode(array("ERROR" => "Hubo un error al cambiar el estado"));
-            $pedido = Pedido::ObtenerPorID($parametros["id"]);
+            $pedido = Pedido::ObtenerPorID($parametros["id"]); // TODO: agregar el estado activo a los pedidos y modificar esta línea
             if ($pedido) {
                 $nuevoEstado = false;
                 $tiempoPreparacion = "";
@@ -152,7 +154,7 @@ class PedidoController implements IApiUsable {
 
     public function TraerUno($request, $response, $args) {
         if (Validadores::ValidarParametros($args, ["id"])) {
-            $pedido = Pedido::ObtenerPorID($args["id"]);
+            $pedido = Pedido::ObtenerPorID($args["id"]); // TODO: agregar el estado activo a los pedidos y modificar esta línea
 
             if ($pedido) {
                 $payload = json_encode(array("Pedido" => $pedido));
@@ -175,8 +177,9 @@ class PedidoController implements IApiUsable {
         $parametros = $request -> getParsedBody ();
 
         if (Validadores::ValidarParametros($parametros, [ "id", "idProducto", "nombreCliente" ])) {
-            $pedido = Pedido::ObtenerPorID($parametros["id"]);
-            if ($pedido && Producto::ObtenerPorID($parametros["idProducto"])) {
+            $pedido = Pedido::ObtenerPorID($parametros["id"]); // TODO: agregar el estado activo a los pedidos y modificar esta línea
+            $producto = Producto::ObtenerPorID($parametros["idProducto"], true);
+            if ($pedido && $producto) {
                 $pedido -> idProducto = $parametros["idProducto"];
                 $pedido -> nombreCliente = $parametros["nombreCliente"];
                 if ($pedido -> Modificar()) {
@@ -185,7 +188,7 @@ class PedidoController implements IApiUsable {
                     $payload = json_encode(array("ERROR" => "No se pudo modificar el pedido"));
                 }
             } else {
-                $payload = json_encode(array("ERROR" => "Tanto el pedido como el producto deben existir para realizar la modificación"));
+                $payload = json_encode(array("ERROR" => "Tanto el pedido como el producto deben existir y estar activos para realizar la modificación"));
             }
         } else {
             $payload = json_encode(array("ERROR" => "El parámetro 'id' es obligatorio para modificar un pedido"));
