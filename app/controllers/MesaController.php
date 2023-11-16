@@ -1,6 +1,7 @@
 <?php
 
 require_once './models/Mesa.php';
+require_once './models/Pedido.php';
 require_once './interfaces/IApiUsable.php';
 require_once './middlewares/Validadores.php';
 
@@ -67,11 +68,16 @@ class MesaController implements IApiUsable {
                     case 'cerrada':
                         $nuevoEstado = "con cliente esperando pedido";
                     break;
-                    case 'con cliente esperando pedido':
-                        $nuevoEstado = 'con cliente comiendo';
-                    break;
+                    // El estado: 'con cliente comiendo' se dispara al entregar pedidos
                     case 'con cliente comiendo':
-                        $nuevoEstado = 'con cliente pagando';
+                        $codigoPedido = (Pedido::ObtenerUltimoPedidoPorMesa($parametros["codigoMesa"])) -> codigoIdentificacion;
+                        $pedidos = Pedido::ObtenerPorCodigoIdentificacion($codigoPedido, true);
+                        // Verifico que todos los pedidos tengan el estado 'entregado'
+                        $todosEntregados = array_reduce(array_column($pedidos, "estado"), function ($carry, $estado) { return $carry && $estado === "entregado"; }, true);
+                        if ($todosEntregados) {
+                            $precioFinal = Pedido::ObtenerFacturaPedido($codigoPedido);
+                            $nuevoEstado = 'con cliente pagando';
+                        }
                     break;
                     case 'con cliente pagando':
                         $queryParams = $request -> getQueryParams();
@@ -86,7 +92,9 @@ class MesaController implements IApiUsable {
 
                 if ($nuevoEstado) {
                     $mesa -> CambiarEstado($nuevoEstado);
-                    $payload = json_encode(array("Resultado" => "La mesa con código {$parametros["codigoMesa"]} ahora tiene el estado '{$nuevoEstado}'"));
+                    $payload = array("Resultado" => "La mesa con código {$parametros["codigoMesa"]} ahora tiene el estado '{$nuevoEstado}'");
+                    if ($nuevoEstado == 'con cliente pagando') $payload["Resultado"] = $payload["Resultado"] . ', y el cliente debe pagar un total de ' . $precioFinal . '$';
+                    $payload = json_encode($payload);
                 } else {
                     $payload = json_encode(array("ERROR" => "Hubo un error en el cambio del estado"));
                 }

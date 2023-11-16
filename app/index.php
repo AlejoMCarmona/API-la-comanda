@@ -66,11 +66,12 @@ $app ->group('/pedidos', function (RouteCollectorProxy $group) {
     $group -> get('[/]', \PedidoController::class . ':TraerTodos') -> add(new AuthMiddleware(["socio"]));
     $group -> get('/pedido/{id}', \PedidoController::class . ':TraerUno') -> add(new AuthMiddleware(["socio","cocinero","cervecero","bartender"]));
     $group -> get('/{codigoIdentificacion}', \PedidoController::class . ':TraerPorCodigoIdentificacion'); // El usuario debería poder ver todos los pedidos de su mesa
-    $group -> get('/tiempoRestante/{codigoMesa}/{idPedido}', \PedidoController::class . ':TraerTiempoEstimadoPedido');
-    $group -> get('/sector/{sector}', \PedidoController::class . ':TraerPedidosPorSector') -> add(new AuthMiddleware(["socio","cocinero","cervecero","bartender","mozo"]));
+    $group -> get('/tiempoRestante/{codigoMesa}/{codigoIdentificacion}', \PedidoController::class . ':TraerTiempoRestante');
+    $group -> get('/sector/{sector}', \PedidoController::class . ':TraerPedidosPendientesPorSector') -> add(new AuthMiddleware(["socio","cocinero","cervecero","bartender","mozo"]));
     $group -> post('[/]', \PedidoController::class . ':CargarUno') -> add(new AuthMiddleware(["mozo"]));
     $group -> post('/cambioEstado', \PedidoController::class . ':CambiarEstado') -> add(new AuthMiddleware(["cocinero","cervecero","bartender"]));
     $group -> put('[/]', \PedidoController::class . ':ModificarUno') -> add(new AuthMiddleware(["mozo","socio"]));
+    $group -> delete('/{id}', \PedidoController::class . ':BorrarUno') -> add(new AuthMiddleware(["mozo","socio"]));
 });
 #endregion
 #region Encuestas
