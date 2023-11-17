@@ -36,7 +36,7 @@ class Usuario {
     }
 
     public function __construct7($nombre, $apellido, $dni, $email, $clave, $puesto, $sector) {
-        $this -> __construct10(0, $nombre, $apellido, $dni, $email, $clave, $puesto, true, $sector, "");
+        $this -> __construct10(0, $nombre, $apellido, $dni, $email, $clave, $puesto, $sector, true, "");
     }
 
     public function __construct6($nombre, $apellido, $dni, $email, $clave, $puesto) {
@@ -135,26 +135,6 @@ class Usuario {
         }
         return $retorno;
     }
-    
-    public static function IniciarSesion($email, $clave) {
-        $retorno = false;
-        $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
-        $consulta = $objetoAccesoDatos -> PrepararConsulta("SELECT * FROM usuarios WHERE email = :email AND activo = TRUE");
-        $consulta -> bindParam(':email', $email);
-        $resultado = $consulta -> execute();
-
-        if ($resultado && $consulta -> rowCount() > 0) {
-            $usuario = $consulta -> fetchObject('Usuario');
-            if (password_verify($clave, $usuario -> clave)) {
-                $retorno = "Inicio sesión correcto";
-            } else {
-                $retorno = "La contraseña es incorrecta";
-            }
-        } else {
-            $retorno = "El email no se encuentra registrado o el usuario fue dado de baja";
-        }
-        return $retorno;
-    }
 
     public static function Borrar($dni) {
         $retorno = false;
@@ -192,6 +172,27 @@ class Usuario {
             $retorno = true;
         }
 
+        return $retorno;
+    }
+
+    public static function IniciarSesion($email, $clave) {
+        $retorno = [ "resultado" => false, "mensaje" => "" ];
+        $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
+        $consulta = $objetoAccesoDatos -> PrepararConsulta("SELECT * FROM usuarios WHERE email = :email AND activo = TRUE");
+        $consulta -> bindParam(':email', $email);
+        $resultado = $consulta -> execute();
+
+        if ($resultado && $consulta -> rowCount() > 0) {
+            $usuario = $consulta -> fetchObject('Usuario');
+            if (password_verify($clave, $usuario -> clave)) {
+                $retorno["resultado"] = true;
+                $retorno["mensaje"] = $usuario;
+            } else {
+                $retorno["mensaje"] = "La contraseña es incorrecta";
+            }
+        } else {
+            $retorno["mensaje"] = "El email no se encuentra registrado o el usuario fue dado de baja";
+        }
         return $retorno;
     }
 }

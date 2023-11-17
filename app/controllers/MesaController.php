@@ -3,7 +3,7 @@
 require_once './models/Mesa.php';
 require_once './models/Pedido.php';
 require_once './interfaces/IApiUsable.php';
-require_once './middlewares/Validadores.php';
+require_once './utils/Validadores.php';
 
 class MesaController implements IApiUsable {
 

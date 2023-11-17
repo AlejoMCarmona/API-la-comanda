@@ -1,6 +1,6 @@
 <?php
 
-require_once './middlewares/Validadores.php';
+require_once './utils/Validadores.php';
 require_once './models/Producto.php';
 require_once './interfaces/IApiUsable.php';
 

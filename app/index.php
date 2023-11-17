@@ -12,6 +12,7 @@ require_once './controllers/UsuarioController.php';
 require_once './controllers/ProductoController.php';
 require_once './controllers/PedidoController.php';
 require_once './controllers/EncuestaController.php';
+require_once './controllers/LoginController.php';
 #endregion
 #region Middlewares
 require_once './Middlewares/AuthMiddleware.php';
@@ -42,8 +43,8 @@ $app -> group('/mesas', function (RouteCollectorProxy $group) {
 });
 #endregion
 #region Usuarios
-$app -> group('/usuarios', function (RouteCollectorProxy $group) {
-    $group -> post('[/]', \UsuarioController::class . ':CargarUno') -> add(new AuthMiddleware(["socio"]));
+$app -> group('/usuarios', function (RouteCollectorProxy $group) { 
+    $group -> post('[/]', \UsuarioController::class . ':CargarUno') -> add(new AuthMiddleware(["socio"])); // TODO: validar que la cantidad de socios sean maximos 3
     $group -> post('/login', \UsuarioController::class . ':IniciarSesion');
     $group -> get('[/]', \UsuarioController::class . ':TraerTodos') -> add(new AuthMiddleware(["socio"]));
     $group -> get('/{dni}', \UsuarioController::class . ':TraerUno') -> add(new AuthMiddleware(["socio"]));
@@ -62,12 +63,12 @@ $app -> group('/productos', function (RouteCollectorProxy $group) {
 });
 #endregion
 #region Pedidos
-$app ->group('/pedidos', function (RouteCollectorProxy $group) {
+$app -> group('/pedidos', function (RouteCollectorProxy $group) {
     $group -> get('[/]', \PedidoController::class . ':TraerTodos') -> add(new AuthMiddleware(["socio"]));
     $group -> get('/pedido/{id}', \PedidoController::class . ':TraerUno') -> add(new AuthMiddleware(["socio","cocinero","cervecero","bartender"]));
     $group -> get('/{codigoIdentificacion}', \PedidoController::class . ':TraerPorCodigoIdentificacion'); // El usuario debería poder ver todos los pedidos de su mesa
     $group -> get('/tiempoRestante/{codigoMesa}/{codigoIdentificacion}', \PedidoController::class . ':TraerTiempoRestante');
-    $group -> get('/sector/{sector}', \PedidoController::class . ':TraerPedidosPendientesPorSector') -> add(new AuthMiddleware(["socio","cocinero","cervecero","bartender","mozo"]));
+    $group -> get('/sector/{sector}', \PedidoController::class . ':TraerPedidosPendientesPorSector') -> add(new AuthMiddleware(["socio","cocinero","cervecero","bartender","mozo"])); // TODO: hacer que se obtenga automaticamente los pedidos del puesto que está logueado
     $group -> post('[/]', \PedidoController::class . ':CargarUno') -> add(new AuthMiddleware(["mozo"]));
     $group -> post('/cambioEstado', \PedidoController::class . ':CambiarEstado') -> add(new AuthMiddleware(["cocinero","cervecero","bartender"]));
     $group -> put('[/]', \PedidoController::class . ':ModificarUno') -> add(new AuthMiddleware(["mozo","socio"]));
@@ -75,9 +76,14 @@ $app ->group('/pedidos', function (RouteCollectorProxy $group) {
 });
 #endregion
 #region Encuestas
-$app ->group('/encuestas', function (RouteCollectorProxy $group) {
+$app -> group('/encuestas', function (RouteCollectorProxy $group) {
     $group -> get('[/]', \EncuestaController::class . ':TraerTodos');
     $group -> post('[/]', \EncuestaController::class . ':CargarUno');
+});
+#endregion
+#region Login
+$app -> group('/login', function (RouteCollectorProxy $group) {
+    $group -> post('[/]', \LoginController::class . ':Login');
 });
 #endregion
 #endregion

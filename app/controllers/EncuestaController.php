@@ -3,14 +3,14 @@
 require_once './models/Encuesta.php';
 require_once './models/Pedido.php';
 require_once './models/Mesa.php';
-require_once './middlewares/Validadores.php';
+require_once './utils/Validadores.php';
 
 class EncuestaController {
     public function CargarUno($request, $response, $args) {
         $parametros = $request -> getParsedBody();
         if (Validadores::ValidarParametros($parametros, [ "codigoPedido", "puntuacionMesa", "puntuacionRestaurante", "puntuacionMozo", "puntuacionCocinero", "descripcionExperiencia" ])) {
             $pedidos = Pedido::ObtenerPorCodigoIdentificacion($parametros["codigoPedido"]);
-            if (is_array($pedidos)) {
+            if (is_array($pedidos) && count($pedidos) > 0) {
                 $codigoMesa = $pedidos[0] -> codigoMesa;
                 $mesa = Mesa::ObtenerPorCodigoIdentificacion($codigoMesa);
                 if ($mesa && $mesa -> estado == 'con cliente pagando') {

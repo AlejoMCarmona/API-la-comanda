@@ -1,6 +1,6 @@
 <?php
 
-require_once './middlewares/Validadores.php';
+require_once './utils/Validadores.php';
 require_once './models/Usuario.php';
 require_once './interfaces/IApiUsable.php';
 
@@ -140,23 +140,6 @@ class UsuarioController implements IApiUsable {
         
         $response -> getBody() -> write($payload);
         return $response -> withHeader('Content-Type', 'application/json');
-    }
-
-    public function IniciarSesion($request, $response, $args) {
-        $parametros = $request -> getParsedBody();
-
-        if (Validadores::ValidarParametros($parametros, [ "email", "clave" ])) {
-            $resultado = Usuario::IniciarSesion($parametros["email"], $parametros["clave"]);
-
-            if (is_string($resultado)) {
-                $payload = json_encode(array("Resultado" => $resultado));
-            } else {
-                $payload = json_encode(array("ERROR" => "Hubo un error al intentar iniciar sesion"));
-            }
-        }
-
-        $response -> getBody() -> write($payload);
-        return $response->withHeader('Content-Type', 'application/json');
     }
 }
 
