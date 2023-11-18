@@ -114,6 +114,19 @@ class ProductoController implements IApiUsable {
 
         return $response;
     }
+
+    public function CargarCSV($request, $response, $args) {
+        $archivosCargados = $request -> getUploadedFiles();
+        $archivo = $archivosCargados["listaProductos"];
+        $payload = json_encode(array("ERROR" => "Hubo un error en la carga del archivo CSV de productos"));
+        if ($archivo -> getError() === UPLOAD_ERR_OK) {
+            if (Producto::CargarDesdeCSV($archivo -> getFilePath())) {
+                $payload = json_encode(array("Resultado" => "El archivo de productos ha sido cargado con éxito en la base de datos"));
+            };
+        }
+        $response -> getBody() -> write($payload);
+        return $response->withHeader('Content-Type', 'application/json');
+    }
 }
 
 ?>

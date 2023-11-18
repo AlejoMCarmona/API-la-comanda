@@ -18,7 +18,7 @@ class Producto {
         }
     }
 
-    public function __construct6($id, $nombre, $tipo, $sector, $precio, $activo, $fechaIncorporacion) {
+    public function __construct7($id, $nombre, $tipo, $sector, $precio, $activo, $fechaIncorporacion) {
         $this -> id = $id;
         $this -> nombre = $nombre;
         $this -> tipo = $tipo;
@@ -29,17 +29,23 @@ class Producto {
     }
 
     public function __construct4($nombre, $tipo, $sector, $precio) {
-        $this -> __construct6(0, $nombre, $tipo, $sector, $precio, true, "");
+        $this -> __construct7(0, $nombre, $tipo, $sector, $precio, true, "");
     }
 
-    public function CrearProducto() {
+    public function CrearProducto($cargarActivo = false) {
         $retorno = false;
         $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
-        $consulta = $objetoAccesoDatos -> PrepararConsulta("INSERT INTO Productos (nombre, tipo, sector, precio) VALUES (:nombre, :tipo, :sector, :precio)");
-        $consulta->bindParam(':nombre', $this -> nombre);
-        $consulta->bindParam(':tipo', $this -> tipo);
-        $consulta->bindParam(':sector', $this -> sector);
-        $consulta->bindParam(':precio', $this -> precio);
+        if ($cargarActivo) {
+            $query = "INSERT INTO Productos (nombre, tipo, sector, precio, activo) VALUES (:nombre, :tipo, :sector, :precio, :activo)";
+        } else {
+            $query = "INSERT INTO Productos (nombre, tipo, sector, precio) VALUES (:nombre, :tipo, :sector, :precio)";
+        }
+        $consulta = $objetoAccesoDatos -> PrepararConsulta($query);
+        $consulta -> bindParam(':nombre', $this -> nombre);
+        $consulta -> bindParam(':tipo', $this -> tipo);
+        $consulta -> bindParam(':sector', $this -> sector);
+        if ($cargarActivo) $consulta -> bindParam(':activo', $this -> activo);
+        $consulta -> bindParam(':precio', $this -> precio);
 
         $resultado = $consulta -> execute();
         if ($resultado) {
@@ -133,6 +139,33 @@ class Producto {
 
         return $retorno;
     }
+
+    public static function CargarDesdeCSV($rutaArchivo) {
+        $retorno = false;
+        if (file_exists($rutaArchivo)) {          
+            $archivo = fopen($rutaArchivo, "r");
+            $listaProductos = array();
+            $cabecera = fgetcsv($archivo);
+            if (count($cabecera) == 7) { // El archivo debe poseer la estructura de la entidad completa, por más que algunos datos los complete la base de datos
+                while(!feof($archivo)) {
+                    $productoArray = fgetcsv($archivo);
+                    if ($productoArray != NULL) {
+                        $producto = new Producto($productoArray[0], $productoArray[1], $productoArray[2], $productoArray[3], $productoArray[4], $productoArray[5], $productoArray[6]);
+                        if ($productoArray[5] == "") { // Si 'activo' está vacio, entonces queda el valor por default
+                            $producto -> CrearProducto();
+                        } else {
+                            $producto -> CrearProducto(true);
+                        }
+                    }
+                }
+                $retorno = true;
+            }
+            fclose($archivo);
+
+        }
+        return $retorno;
+    }
+
 }
 
 ?>

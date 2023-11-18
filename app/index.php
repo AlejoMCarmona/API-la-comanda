@@ -57,7 +57,8 @@ $app -> group('/usuarios', function (RouteCollectorProxy $group) {
 $app -> group('/productos', function (RouteCollectorProxy $group) {
     $group -> post('[/]', \ProductoController::class . ':CargarUno') -> add(new AuthMiddleware(["socio"]));
     $group -> get('[/]', \ProductoController::class . ':TraerTodos');
-    $group -> get('/descargar', \ProductoController::class . ':DescargarCSV') -> add(new AuthMiddleware(["socio"]));
+    $group -> get('/csv', \ProductoController::class . ':DescargarCSV') -> add(new AuthMiddleware(["socio"]));
+    $group -> post('/csv', \ProductoController::class . ':CargarCSV') -> add(new AuthMiddleware(["socio"]));
     $group -> get('/{id}', \ProductoController::class . ':TraerUno');
     $group -> delete('/{id}', \ProductoController::class . ':BorrarUno') -> add(new AuthMiddleware(["socio"]));
     $group -> put('[/]', \ProductoController::class . ':ModificarUno') -> add(new AuthMiddleware(["socio"]));
