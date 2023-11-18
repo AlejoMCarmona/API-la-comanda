@@ -17,10 +17,7 @@ class PedidoController implements IApiUsable {
                 if ($mesa -> estado != "cerrada") {
                     $codigoIdentificacion = Pedido::ObtenerUltimoPedidoPorMesa($parametros['codigoMesa']) -> codigoIdentificacion;
                 } else {
-                    //TODO: cambiar
                     $codigoIdentificacion = Validadores::GenerarNumeroAlfanumericoIdentificacion(5, "Pedido");
-                    $fotoMesa = $request -> getUploadedFiles()['foto'];
-                    self::SubirFotoMesa($codigoIdentificacion, $fotoMesa);
                 }
 
                 $pedido = new Pedido($parametros['codigoMesa'], $parametros['idProducto'], $parametros["nombreCliente"], $codigoIdentificacion);
@@ -237,7 +234,7 @@ class PedidoController implements IApiUsable {
     }
 
 	public function ModificarUno($request, $response, $args) {
-        $parametros = $request -> getParsedBody ();
+        $parametros = $request -> getParsedBody();
 
         if (Validadores::ValidarParametros($parametros, [ "id", "idProducto", "nombreCliente" ])) {
             $pedido = Pedido::ObtenerPorID($parametros["id"], true);
@@ -261,29 +258,42 @@ class PedidoController implements IApiUsable {
         return $response->withHeader('Content-Type', 'application/json');
     }
 
-    private static function SubirFotoMesa($codigoIdentificacion, $fotoMesa) {
-        $retorno = false;
+    public function SubirFotoMesa($request, $response, $args) {
+        $parametros = $request -> getParsedBody();
+        $fotoMesa = $request -> getUploadedFiles()['foto'];
 
-        if ($fotoMesa -> getError() === UPLOAD_ERR_OK) {
-            $path = './fotos/pedidosDeMesas';
-    
-            if (!file_exists($path)) {
-                if (!file_exists('./fotos')) {
-                    mkdir('./fotos', 0777);
+        if (Validadores::ValidarParametros($parametros, [ "codigoIdentificacion" ]) && $fotoMesa -> getError() === UPLOAD_ERR_OK) {
+            $codigoIdentificacion = $parametros["codigoIdentificacion"];
+            $pedidos = Pedido::ObtenerPorCodigoIdentificacion($codigoIdentificacion);
+
+            if ($pedidos && count($pedidos) > 0) {
+                $ruta = './fotos/pedidosDeMesas';
+                if (!file_exists($ruta)) {
+                    if (!file_exists('./fotos')) {
+                        mkdir('./fotos', 0777);
+                    }
+                    mkdir($ruta, 0777);
                 }
-                mkdir($path, 0777);
+    
+                $extension = pathinfo($fotoMesa -> getClientFilename(), PATHINFO_EXTENSION);
+                $nombreFoto = $codigoIdentificacion . date("Ymd") . '.' . $extension;
+                $rutaCompleta = $ruta . '/' . $nombreFoto;
+                if (!file_exists($rutaCompleta)) {
+                    $fotoMesa -> moveTo($rutaCompleta);
+                    $payload = json_encode(array("Resultado" => "La foto de la mesa para el pedido {$codigoIdentificacion} se ha subido correctamente"));
+                } else {
+                    $payload = json_encode(array("ERROR" => "Ya se ha subido una foto para el pedido de esta mesa"));
+                }  
+            } else {
+                $payload = json_encode(array("ERROR" => "No existe un pedido con el código de identificación {$codigoIdentificacion}"));
             }
 
-            $extension = pathinfo($fotoMesa -> getClientFilename(), PATHINFO_EXTENSION);
-            $nombreFoto = $codigoIdentificacion . date("Ymd") . '.' . $extension;
-            $fotoMesa -> moveTo($path . '/' . $nombreFoto);
-    
-            $retorno = true;
         } else {
-            $retorno = false;
+            $payload = json_encode(array("ERROR" => "El parámetro 'codigoIdentificacion' y una foto son obligatorios para cargar la foto de la mesa"));
         }
 
-        return $retorno;
+        $response -> getBody() -> write($payload);
+        return $response -> withHeader('Content-Type', 'application/json');
     }
 }
 

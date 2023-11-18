@@ -44,7 +44,7 @@ $app -> group('/mesas', function (RouteCollectorProxy $group) {
 #endregion
 #region Usuarios
 $app -> group('/usuarios', function (RouteCollectorProxy $group) { 
-    $group -> post('[/]', \UsuarioController::class . ':CargarUno') -> add(new AuthMiddleware(["socio"])); // TODO: validar que la cantidad de socios sean maximos 3
+    $group -> post('[/]', \UsuarioController::class . ':CargarUno') -> add(new AuthMiddleware(["socio"]));
     $group -> post('/login', \UsuarioController::class . ':IniciarSesion');
     $group -> get('[/]', \UsuarioController::class . ':TraerTodos') -> add(new AuthMiddleware(["socio"]));
     $group -> get('/{dni}', \UsuarioController::class . ':TraerUno') -> add(new AuthMiddleware(["socio"]));
@@ -70,9 +70,10 @@ $app -> group('/pedidos', function (RouteCollectorProxy $group) {
     $group -> get('/pedido/{id}', \PedidoController::class . ':TraerUno') -> add(new AuthMiddleware(["socio","cocinero","cervecero","bartender"]));
     $group -> get('/{codigoIdentificacion}', \PedidoController::class . ':TraerPorCodigoIdentificacion'); // El usuario debería poder ver todos los pedidos de su mesa
     $group -> get('/tiempoRestante/{codigoMesa}/{codigoIdentificacion}', \PedidoController::class . ':TraerTiempoRestante');
-    $group -> get('/sector/{sector}', \PedidoController::class . ':TraerPedidosPendientesPorSector') -> add(new AuthMiddleware(["socio","cocinero","cervecero","bartender","mozo"])); // TODO: hacer que se obtenga automaticamente los pedidos del puesto que está logueado
+    $group -> get('/sector/{sector}', \PedidoController::class . ':TraerPedidosPendientesPorSector') -> add(new AuthMiddleware(["socio","cocinero","cervecero","bartender","mozo"]));
     $group -> post('[/]', \PedidoController::class . ':CargarUno') -> add(new AuthMiddleware(["mozo"]));
     $group -> post('/cambioEstado', \PedidoController::class . ':CambiarEstado') -> add(new AuthMiddleware(["cocinero","cervecero","bartender"]));
+    $group -> post('/foto', \PedidoController::class . ':SubirFotoMesa') -> add(new AuthMiddleware(["mozo","socio"]));
     $group -> put('[/]', \PedidoController::class . ':ModificarUno') -> add(new AuthMiddleware(["mozo","socio"]));
     $group -> delete('/{id}', \PedidoController::class . ':BorrarUno') -> add(new AuthMiddleware(["mozo","socio"]));
 });
