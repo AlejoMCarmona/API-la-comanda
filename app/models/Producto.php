@@ -6,6 +6,7 @@ class Producto {
     public $tipo;
     public $sector;
     public $precio;
+    public $activo;
     public $fechaIncorporacion;
 
     public function __construct() {
@@ -17,17 +18,18 @@ class Producto {
         }
     }
 
-    public function __construct6($id, $nombre, $tipo, $sector, $precio, $fechaIncorporacion) {
+    public function __construct6($id, $nombre, $tipo, $sector, $precio, $activo, $fechaIncorporacion) {
         $this -> id = $id;
         $this -> nombre = $nombre;
         $this -> tipo = $tipo;
         $this -> sector = $sector;
         $this -> precio = $precio;
+        $this -> activo = $activo;
         $this -> fechaIncorporacion = $fechaIncorporacion;
     }
 
     public function __construct4($nombre, $tipo, $sector, $precio) {
-        $this -> __construct6(0, $nombre, $tipo, $sector, $precio,"");
+        $this -> __construct6(0, $nombre, $tipo, $sector, $precio, true, "");
     }
 
     public function CrearProducto() {
@@ -103,6 +105,30 @@ class Producto {
 
         if ($resultado) {
             $retorno = true;
+        }
+
+        return $retorno;
+    }
+
+    public static function GuardarEnCSV() {
+        $retorno = false;
+
+        $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
+        $consulta = $objetoAccesoDatos -> PrepararConsulta("SELECT * FROM productos");
+        $resultado = $consulta -> execute();
+
+        if ($resultado) {
+            $listaProductos = $consulta -> fetchAll(PDO::FETCH_CLASS, 'Producto');
+            $timestamp = time();
+            $nombreArchivoTemporal = sys_get_temp_dir() . "\listaProductos_{$timestamp}.csv";
+            // echo $nombreArchivoTemporal;
+            $archivo = fopen($nombreArchivoTemporal, "w");
+            fputcsv($archivo, [ "id", "nombre", "tipo", "sector", "precio", "activo", "fechaIncorporacion" ]);
+            foreach ($listaProductos as $producto) {
+                fputcsv($archivo, (array)$producto);
+            }
+            fclose($archivo);
+            $retorno = $nombreArchivoTemporal;
         }
 
         return $retorno;

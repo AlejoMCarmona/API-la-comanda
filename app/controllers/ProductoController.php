@@ -96,6 +96,24 @@ class ProductoController implements IApiUsable {
         $response -> getBody() -> write($payload);
         return $response->withHeader('Content-Type', 'application/json');
     }
+
+    public function DescargarCSV($request, $response, $args) {
+        $resultado = Producto::GuardarEnCSV();
+
+        if ($resultado) {             
+            $response = $response -> withHeader('Content-Type', 'octet-stream');
+            $response = $response -> withHeader('Content-Disposition', 'attachment; filename="' . basename($resultado) . '"');
+            $response = $response -> withHeader('Content-Length', filesize($resultado));
+            readfile($resultado);
+
+            $payload = json_encode(array("Resultado" => "El archivo de productos ha sido descargado con éxito"));
+        } else {
+            $payload = json_encode(array("ERROR" => "No se pudo descargar el archivo de productos"));
+            $response = $response -> withHeader('Content-Type', 'application/json');
+        }
+
+        return $response;
+    }
 }
 
 ?>
