@@ -20,6 +20,12 @@ class Validadores {
         return true;
     }
 
+    public static function ValidarEnum($valor, $claseEnum) {
+        $reflector = new ReflectionClass($claseEnum);
+        $valoresEnum = $reflector -> getConstants();
+        return in_array($valor, $valoresEnum);
+    }
+
     public static function GenerarNumeroAlfanumericoIdentificacion($longitud, $clase) {
         $caracteres = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
         $codigoIdentificacion = '';

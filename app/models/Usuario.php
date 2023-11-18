@@ -66,6 +66,7 @@ class Usuario {
         if ($resultado) {
             $retorno = $objetoAccesoDatos -> ObtenerUltimoId();
         }
+        
         return $retorno;
     }
 
@@ -192,6 +193,19 @@ class Usuario {
             }
         } else {
             $retorno["mensaje"] = "El email no se encuentra registrado o el usuario fue dado de baja";
+        }
+        return $retorno;
+    }
+
+    public static function ExisteElUsuario($dni, $email) {
+        $retorno = false;
+        $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
+        $consulta = $objetoAccesoDatos -> PrepararConsulta("SELECT id FROM usuarios WHERE dni = :dni OR email = :email");
+        $consulta -> bindParam(':dni', $dni);
+        $consulta -> bindParam(':email', $email);
+        $resultado = $consulta -> execute();
+        if ($resultado && $consulta -> rowCount() > 0) {
+            $retorno = true;
         }
         return $retorno;
     }

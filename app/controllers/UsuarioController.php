@@ -1,6 +1,7 @@
 <?php
 
 require_once './utils/Validadores.php';
+require_once './utils/Enums.php';
 require_once './models/Usuario.php';
 require_once './interfaces/IApiUsable.php';
 
@@ -9,28 +10,42 @@ class UsuarioController implements IApiUsable {
     public function CargarUno($request, $response, $args) {
         $parametros = $request -> getParsedBody();
     
-        if (!Validadores::ValidarParametros($parametros, ["nombre", "apellido", "dni", "email", "clave", "puesto"])) {
-            $payload = json_encode(array("ERROR" => "Los parámetros obligatorios para cargar un nuevo usuario son: nombre, apellido, dni, email, clave y puesto"));
+        if (!Validadores::ValidarParametros($parametros, ["nombre", "apellido", "dni", "email", "clave", "puesto"]) || !Validadores::ValidarEnum($parametros["puesto"], PuestosEnum::class)) {
+            $payload = json_encode(array("ERROR" => "Los parámetros obligatorios para cargar un nuevo usuario son: nombre, apellido, dni, email, clave y puesto (cocinero/mozo/bartender/cervecero/socio)"));
         } else {
             $resultado = false;
     
-            if ($parametros["puesto"] != 'mozo' && $parametros["puesto"] != 'socio') {
-                if (!Validadores::ValidarParametros($parametros, ["sector"])) {
-                    $payload = json_encode(array("ERROR" => "Se debe especificar un sector si el empleado no es un mozo ni un socio"));
+            if (!Usuario::ExisteElUsuario($parametros["dni"], $parametros["email"])) {
+                // Si NO existe un usuario con mismo DNI o email, se intenta agregar:
+                if ($parametros["puesto"] != 'mozo' && $parametros["puesto"] != 'socio') {
+                    if (!Validadores::ValidarParametros($parametros, ["sector"]) || !Validadores::ValidarEnum($parametros["sector"], SectoresEnum::class)) {
+                        $payload = json_encode(array("ERROR" => "Se debe especificar un sector válido (cocina/candyBar/barraChoperas/barraTragos) si el empleado no es un mozo ni un socio"));
+                    } else {
+                        $usuario = new Usuario($parametros['nombre'], $parametros['apellido'], $parametros['dni'], $parametros['email'], $parametros['clave'], $parametros['puesto'], $parametros['sector']);
+                        $resultado = $usuario -> CrearUsuario();
+                    }
+                } else if ($parametros["puesto"] == 'socio') {
+                    $sociosActuales = Usuario::ObtenerUsuariosPorPuesto("socio", true);
+                    if (count($sociosActuales) < 3) {
+                        $usuario = new Usuario($parametros['nombre'], $parametros['apellido'], $parametros['dni'], $parametros['email'], $parametros['clave'], $parametros['puesto']);
+                        $resultado = $usuario -> CrearUsuario();
+                    } else {
+                        $payload = json_encode(array("ERROR" => "Solo pueden haber 3 socios como máximo"));
+                    }
                 } else {
-                    $usuario = new Usuario($parametros['nombre'], $parametros['apellido'], $parametros['dni'], $parametros['email'], $parametros['clave'], $parametros['puesto'], $parametros['sector']);
+                    $usuario = new Usuario($parametros['nombre'], $parametros['apellido'], $parametros['dni'], $parametros['email'], $parametros['clave'], $parametros['puesto']);
                     $resultado = $usuario -> CrearUsuario();
                 }
+        
+                if (is_numeric($resultado)) {
+                    $payload = json_encode(array("Resultado" => "Se ha creado con éxito un usuario con el ID {$resultado}"));
+                } elseif (!isset($payload)) {
+                    $payload = json_encode(array("ERROR" => "Hubo un error durante el alta del nuevo usuario"));
+                }
             } else {
-                $usuario = new Usuario($parametros['nombre'], $parametros['apellido'], $parametros['dni'], $parametros['email'], $parametros['clave'], $parametros['puesto']);
-                $resultado = $usuario -> CrearUsuario();
+                $payload = json_encode(array("ERROR" => "El email o número de documento proporcionado para el usuario ya existe"));
             }
-    
-            if (is_numeric($resultado)) {
-                $payload = json_encode(array("Resultado" => "Se ha creado con éxito un usuario con el ID {$resultado}"));
-            } elseif (!isset($payload)) {
-                $payload = json_encode(array("ERROR" => "Hubo un error durante el alta del nuevo usuario"));
-            }
+
         }
     
         $response -> getBody() -> write($payload);
@@ -80,8 +95,8 @@ class UsuarioController implements IApiUsable {
             $payload = json_encode(array("ERROR" => "El parámetro 'dni' es obligatorio para obtener un usuario"));
         }
 
-        $response->getBody()->write($payload);
-        return $response->withHeader('Content-Type', 'application/json');
+        $response ->getBody() -> write($payload);
+        return $response -> withHeader('Content-Type', 'application/json');
     }
 
     public function BorrarUno($request, $response, $args) {
@@ -105,14 +120,14 @@ class UsuarioController implements IApiUsable {
 	public function ModificarUno($request, $response, $args) {
         $parametros = $request -> getParsedBody ();
 
-        if (Validadores::ValidarParametros($parametros, ["id", "nombre", "apellido", "dni", "email", "puesto"])) {
+        if (Validadores::ValidarParametros($parametros, [ "id", "nombre", "apellido", "dni", "email", "puesto" ]) && Validadores::ValidarEnum($parametros["puesto"], PuestosEnum::class)) {
             $usuario = Usuario::ObtenerPorID($parametros["id"], true);
             if ($usuario) {
                 $nuevoPuestoUsuario = $parametros["puesto"];
                 if ($nuevoPuestoUsuario == 'mozo' || $nuevoPuestoUsuario == 'socio') {
                     $usuario -> sector = NULL;
                 } else if ($nuevoPuestoUsuario != 'mozo' && $nuevoPuestoUsuario != 'socio') {
-                    if (Validadores::ValidarParametros($parametros, ["sector"])) {
+                    if (Validadores::ValidarParametros($parametros, ["sector"]) && Validadores::ValidarEnum($parametros["sector"], SectoresEnum::class)) {
                         $usuario -> sector = $parametros["sector"];
                     } else {
                         $payload = json_encode(array("ERROR" => "Se debe especificar un sector si el empleado no es un mozo o un socio"));
