@@ -93,7 +93,7 @@ class Producto {
         $consulta = $objetoAccesoDatos -> PrepararConsulta("UPDATE productos SET activo = FALSE WHERE id = :id");
         $consulta -> bindParam(':id', $id);
         $resultado = $consulta -> execute();
-        if ($resultado) {
+        if ($resultado && $consulta -> rowCount() > 0) {
             $retorno = true;
         }
         return $retorno;

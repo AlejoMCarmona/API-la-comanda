@@ -28,11 +28,11 @@ class UsuarioController implements IApiUsable {
                 } else if ($parametros["puesto"] == 'socio') {
                     // Si el nuevo usuario es un socio
                     $sociosActuales = Usuario::ObtenerUsuariosPorPuesto("socio", true);
-                    if (count($sociosActuales) < 3) {
+                    if ($sociosActuales && count($sociosActuales) == 3) {
+                        $payload = json_encode(array("ERROR" => "Solo pueden haber 3 socios como máximo"));
+                    } else {
                         $usuario = new Usuario($parametros['nombre'], $parametros['apellido'], $parametros['dni'], $parametros['email'], $parametros['clave'], $parametros['puesto']);
                         $resultado = $usuario -> CrearUsuario();
-                    } else {
-                        $payload = json_encode(array("ERROR" => "Solo pueden haber 3 socios como máximo"));
                     }
                 } else {
                     // Si el nuevo usuario es un mozo

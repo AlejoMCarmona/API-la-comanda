@@ -59,7 +59,7 @@ class MesaController implements IApiUsable {
 
     public function CambiarEstado($request, $response, $args) {
         $parametros = $request -> getParsedBody();
-        
+
         if (Validadores::ValidarParametros($parametros, [ "codigoMesa" ])) {
             $mesa = Mesa::ObtenerPorCodigoIdentificacion($parametros["codigoMesa"], true);
             if ($mesa) {
@@ -78,8 +78,10 @@ class MesaController implements IApiUsable {
                         }
                     break;
                     case 'con cliente pagando':
-                        $queryParams = $request -> getQueryParams();
-                        if ($queryParams["puesto"] == "socio") {
+                        $token = trim(explode("Bearer", $request -> getHeaderLine('Authorization'))[1]);
+                        AutentificadorJWT::VerificarToken($token);
+                        $puestoToken = AutentificadorJWT::ObtenerData($token) -> puesto;
+                        if ($puestoToken == "socio") {
                             $nuevoEstado = 'cerrada';
                         }
                     break;

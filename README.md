@@ -405,7 +405,7 @@ Esta entidad sirve para representar a las encuentas realizadas por los clientes 
 
 ### Crear nueva encuesta
 
-El usuario tiene la posibilidad de evaluar la atención recibida en varios puntos. La creación de la encuesta es posible una vez que el cliente terminó de comer.
+El usuario tiene la posibilidad de evaluar la atención recibida en varios puntos. La creación de la encuesta es posible una vez que el cliente terminó de comer. Se pueden realizar muchas reseñas para un mismo pedido, puesto que los comensales pueden ser varios.
 
 Ruta: http://localhost:3000/encuestas</br>
 Método HTTP: POST</br>
@@ -442,7 +442,7 @@ Se le notificará al usuario si el email no existe, si la contraseña es incorre
 1. Se da de alta un primer pedido con un producto, esto hará que la mesa asociada al mismo cambio su estado de 'cerrada' a 'con cliente esperando pedido', también generará un código alfanumérico de 5 dígitos que permitirá asociar los siguientes pedidos de la mesa con un mismo código. 
 2. Los empleados toman los pedidos y los preparan, cambiando el estado de los mismos en cada paso. El usuario puede, si es que todos los pedidos ya no están pendientes, determinar el tiempo restante de entrega de los mismos.
 3. A medida que los pedidos se finalizan, se entregan a la mesa. Esto hace que el estado de la misma pase de 'con cliente esperando pedido' a 'con cliente comiendo'.
-4. Una vez que el cliente termina de comer y procede a pedir la cuenta, se cambia el estado de la mesa de 'con cliente comiendo' a 'con cliente pagando', indicándole al mismo el monto final a abonar.
+4. Una vez que el cliente termina de comer y procede a pedir la cuenta, se cambia el estado de la mesa de 'con cliente comiendo' a 'con cliente pagando', indicándole al mismo el monto final a abonar. El cliente puede, en este momento, dejar una reseña acerca de su atención recibida (se pueden realizar muchas reseñas para un mismo pedido, puesto que los comensales pueden ser varios).
 5. Una vez que el cliente pagó la cuenta, el socio cambia el estado de la mesa de 'con cliente pagando' a 'cerrada', dejando a la mesa preparada para recibir nuevos clientes.
 
 <hr>

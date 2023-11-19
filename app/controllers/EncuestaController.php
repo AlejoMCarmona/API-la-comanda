@@ -6,6 +6,7 @@ require_once './models/Mesa.php';
 require_once './utils/Validadores.php';
 
 class EncuestaController {
+    // Se pueden realizar muchas reseñas para un mismo pedido, puesto que los comensales pueden ser varios
     public function CargarUno($request, $response, $args) {
         $parametros = $request -> getParsedBody();
         if (Validadores::ValidarParametros($parametros, [ "codigoPedido", "puntuacionMesa", "puntuacionRestaurante", "puntuacionMozo", "puntuacionCocinero", "descripcionExperiencia" ]) && strlen($parametros["descripcionExperiencia"]) <= 66) {
@@ -13,7 +14,7 @@ class EncuestaController {
             if (is_array($pedidos) && count($pedidos) > 0) {
                 $codigoMesa = $pedidos[0] -> codigoMesa;
                 $mesa = Mesa::ObtenerPorCodigoIdentificacion($codigoMesa);
-                if ($mesa && $mesa -> estado == 'con cliente pagando') {
+                if ($mesa && ($mesa -> estado == 'con cliente pagando' || $mesa -> estado == 'cerrada')) {
                     $encuesta = new Encuesta($parametros["codigoPedido"], $parametros["puntuacionMesa"], $parametros["puntuacionRestaurante"], $parametros["puntuacionMozo"], $parametros["puntuacionCocinero"], $parametros["descripcionExperiencia"]); 
                     $resultado = $encuesta -> CrearEncuesta();
                     if (is_numeric($resultado)) {
