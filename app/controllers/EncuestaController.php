@@ -8,7 +8,7 @@ require_once './utils/Validadores.php';
 class EncuestaController {
     public function CargarUno($request, $response, $args) {
         $parametros = $request -> getParsedBody();
-        if (Validadores::ValidarParametros($parametros, [ "codigoPedido", "puntuacionMesa", "puntuacionRestaurante", "puntuacionMozo", "puntuacionCocinero", "descripcionExperiencia" ])) {
+        if (Validadores::ValidarParametros($parametros, [ "codigoPedido", "puntuacionMesa", "puntuacionRestaurante", "puntuacionMozo", "puntuacionCocinero", "descripcionExperiencia" ]) && strlen($parametros["descripcionExperiencia"]) <= 66) {
             $pedidos = Pedido::ObtenerPorCodigoIdentificacion($parametros["codigoPedido"]);
             if (is_array($pedidos) && count($pedidos) > 0) {
                 $codigoMesa = $pedidos[0] -> codigoMesa;
@@ -28,7 +28,7 @@ class EncuestaController {
                 $payload = json_encode(array("Resultado" => "No se encontraron los pedidos con el código {$parametros["codigoPedido"]}"));
             }
         } else {
-            $payload = json_encode(array("ERROR" => "Los parámetros 'codigoPedido', 'puntuacionMesa', 'puntuacionRestaurante', 'puntuacionMozo', 'puntuacionCocinero', 'descripcionExperiencia' son obligatorios para dar de crear una encuesta"));
+            $payload = json_encode(array("ERROR" => "Los parámetros 'codigoPedido', 'puntuacionMesa', 'puntuacionRestaurante', 'puntuacionMozo', 'puntuacionCocinero', 'descripcionExperiencia' (66 caracteres máximo) son obligatorios para dar de crear una encuesta"));
         }
 
         $response -> getBody() -> write($payload);

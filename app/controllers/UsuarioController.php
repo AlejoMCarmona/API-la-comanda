@@ -18,6 +18,7 @@ class UsuarioController implements IApiUsable {
             if (!Usuario::ExisteElUsuario($parametros["dni"], $parametros["email"])) {
                 // Si NO existe un usuario con mismo DNI o email, se intenta agregar:
                 if ($parametros["puesto"] != 'mozo' && $parametros["puesto"] != 'socio') {
+                    // Si el nuevo usuario no es ni socio ni mozo
                     if (!Validadores::ValidarParametros($parametros, ["sector"]) || !Validadores::ValidarEnum($parametros["sector"], SectoresEnum::class)) {
                         $payload = json_encode(array("ERROR" => "Se debe especificar un sector válido (cocina/candyBar/barraChoperas/barraTragos) si el empleado no es un mozo ni un socio"));
                     } else {
@@ -25,6 +26,7 @@ class UsuarioController implements IApiUsable {
                         $resultado = $usuario -> CrearUsuario();
                     }
                 } else if ($parametros["puesto"] == 'socio') {
+                    // Si el nuevo usuario es un socio
                     $sociosActuales = Usuario::ObtenerUsuariosPorPuesto("socio", true);
                     if (count($sociosActuales) < 3) {
                         $usuario = new Usuario($parametros['nombre'], $parametros['apellido'], $parametros['dni'], $parametros['email'], $parametros['clave'], $parametros['puesto']);
@@ -33,6 +35,7 @@ class UsuarioController implements IApiUsable {
                         $payload = json_encode(array("ERROR" => "Solo pueden haber 3 socios como máximo"));
                     }
                 } else {
+                    // Si el nuevo usuario es un mozo
                     $usuario = new Usuario($parametros['nombre'], $parametros['apellido'], $parametros['dni'], $parametros['email'], $parametros['clave'], $parametros['puesto']);
                     $resultado = $usuario -> CrearUsuario();
                 }
@@ -66,7 +69,7 @@ class UsuarioController implements IApiUsable {
     }
 
     public function TraerPorPuesto($request, $response, $args) {
-        if (Validadores::ValidarParametros($args, [ "puesto" ])) {
+        if (Validadores::ValidarParametros($args, [ "puesto" ]) && Validadores::ValidarEnum($args["puesto"], PuestosEnum::class)) {
             $lista = Usuario::ObtenerUsuariosPorPuesto($args["puesto"], true);
 
             if (is_array($lista)) {
@@ -75,7 +78,7 @@ class UsuarioController implements IApiUsable {
                 $payload = json_encode(array("ERROR" => "Hubo un error al obtener todos los usuarios"));
             }
         } else {
-            $payload = json_encode(array("ERROR" => "El parámetro 'puesto' es obligatorio para traer a los empleados por puesto"));
+            $payload = json_encode(array("ERROR" => "El parámetro 'puesto' (cocinero/mozo/bartender/cervecero/socio) es obligatorio para traer a los empleados por puesto"));
         }
 
         $response -> getBody() -> write($payload);
@@ -130,7 +133,7 @@ class UsuarioController implements IApiUsable {
                     if (Validadores::ValidarParametros($parametros, ["sector"]) && Validadores::ValidarEnum($parametros["sector"], SectoresEnum::class)) {
                         $usuario -> sector = $parametros["sector"];
                     } else {
-                        $payload = json_encode(array("ERROR" => "Se debe especificar un sector si el empleado no es un mozo o un socio"));
+                        $payload = json_encode(array("ERROR" => "Se debe especificar un sector (cocina/candyBar/barraChoperas/barraTragos) si el empleado no es un mozo o un socio"));
                     }
                 }
 
@@ -150,7 +153,7 @@ class UsuarioController implements IApiUsable {
                 $payload = json_encode(array("ERROR" => "No se pudo encontrar al usuario para realizar la modificación"));
             }
         } else {
-            $payload = json_encode(array("ERROR" => "El parámetro 'id', 'nombre', 'apellido', 'dni', 'email' y 'puesto' son obligatorios para modificar un usuario"));
+            $payload = json_encode(array("ERROR" => "El parámetro 'id', 'nombre', 'apellido', 'dni', 'email' y 'puesto' (cocinero/mozo/bartender/cervecero/socio) son obligatorios para modificar un usuario"));
         }
         
         $response -> getBody() -> write($payload);

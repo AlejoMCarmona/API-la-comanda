@@ -144,7 +144,7 @@ class Usuario {
         $consulta -> bindParam(':dni', $dni);
         $resultado = $consulta -> execute();
 
-        if ($resultado) {
+        if ($resultado && $consulta -> rowCount() == 1) {
             $retorno = true;
         }
 

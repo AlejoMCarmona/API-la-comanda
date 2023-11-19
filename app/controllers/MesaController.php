@@ -65,10 +65,8 @@ class MesaController implements IApiUsable {
             if ($mesa) {
                 $nuevoEstado = false;
                 switch($mesa -> estado) {
-                    case 'cerrada':
-                        $nuevoEstado = "con cliente esperando pedido";
-                    break;
-                    // El estado: 'con cliente comiendo' se dispara al entregar pedidos
+                    // El estado: 'con cliente esperando pedido' se asigna al momento de crear pedidos para la mesa
+                    // El estado: 'con cliente comiendo' se asigna al entregar pedidos en la mesa
                     case 'con cliente comiendo':
                         $codigoPedido = (Pedido::ObtenerUltimoPedidoPorMesa($parametros["codigoMesa"])) -> codigoIdentificacion;
                         $pedidos = Pedido::ObtenerPorCodigoIdentificacion($codigoPedido, true);
@@ -90,10 +88,10 @@ class MesaController implements IApiUsable {
                     break;
                 }
 
-                if ($nuevoEstado) {
+                if ($nuevoEstado) { // Si se tiene un nuevo estado, entonces cambio el estado de la mesa
                     $mesa -> CambiarEstado($nuevoEstado);
                     $payload = array("Resultado" => "La mesa con código {$parametros["codigoMesa"]} ahora tiene el estado '{$nuevoEstado}'");
-                    if ($nuevoEstado == 'con cliente pagando') $payload["Resultado"] = $payload["Resultado"] . ', y el cliente debe pagar un total de ' . $precioFinal . '$';
+                    if ($nuevoEstado == 'con cliente pagando') $payload["Resultado"] = $payload["Resultado"] . '. El cliente debe pagar un total de ' . $precioFinal . '$';
                     $payload = json_encode($payload);
                 } else {
                     $payload = json_encode(array("ERROR" => "Hubo un error en el cambio del estado"));
@@ -131,7 +129,7 @@ class MesaController implements IApiUsable {
         if (Validadores::ValidarParametros($parametros, [ "id", "asientos" ])) {
             $mesa = Mesa::ObtenerPorID($parametros["id"], true);
             if ($mesa) {
-                $mesa -> asientos = $parametros["asientos"];
+                $mesa -> asientos = (int)$parametros["asientos"];
                 if ($mesa -> Modificar()) {
                     $payload = json_encode(array("mesa modificada:" => $mesa));
                 } else {

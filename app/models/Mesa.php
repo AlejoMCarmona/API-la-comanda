@@ -123,7 +123,7 @@ class Mesa {
         $retorno = false;
         $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
         $consulta = $objetoAccesoDatos -> PrepararConsulta("UPDATE mesas SET asientos = :asientos WHERE id = :id");
-        $consulta -> bindParam(':id', $id);
+        $consulta -> bindParam(':id', $this -> id);
         $consulta -> bindParam(':asientos', $this -> asientos);
         $resultado = $consulta -> execute();
 

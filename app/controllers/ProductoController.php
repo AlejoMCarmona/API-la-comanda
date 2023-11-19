@@ -9,7 +9,7 @@ class ProductoController implements IApiUsable {
     public function CargarUno($request, $response, $args) {
         $parametros = $request -> getParsedBody();
 
-        if (Validadores::ValidarParametros($parametros, [ "nombre", "tipo", "sector", "precio" ]) && Validadores::ValidarEnum($parametros["tipo"], TiposComidaEnum::class)) { 
+        if (Validadores::ValidarParametros($parametros, [ "nombre", "tipo", "sector", "precio" ]) && Validadores::ValidarEnum($parametros["tipo"], TiposComidaEnum::class) && Validadores::ValidarEnum($parametros["sector"], SectoresEnum::class)) { 
             $producto = new Producto($parametros['nombre'], $parametros['tipo'], $parametros['sector'], $parametros['precio']);
             $resultado = $producto -> CrearProducto();
 
@@ -19,7 +19,7 @@ class ProductoController implements IApiUsable {
                 $payload = json_encode(array("ERROR" => "Hubo un error durante la incorporación del nuevo producto a la carta"));
             }
         } else {
-            $payload = json_encode(array("ERROR" => "Los parámetros obligatorios para agregar un nuevo producto a la carta son: nombre, tipo (bebida/comida) y precio"));
+            $payload = json_encode(array("ERROR" => "Los parámetros obligatorios para agregar un nuevo producto a la carta son: nombre, tipo (bebida/comida), sector (cocina/candyBar/barraChoperas/barraTragos) y precio"));
         }
 
         $response -> getBody() -> write($payload);
@@ -75,7 +75,7 @@ class ProductoController implements IApiUsable {
 
 	public function ModificarUno($request, $response, $args) {
         $parametros = $request -> getParsedBody ();
-        if (Validadores::ValidarParametros($parametros, [ "id", "tipo", "sector", "precio" ]) && Validadores::ValidarEnum($parametros["tipo"], TiposComidaEnum::class)) {
+        if (Validadores::ValidarParametros($parametros, [ "id", "tipo", "sector", "precio" ]) && Validadores::ValidarEnum($parametros["tipo"], TiposComidaEnum::class) && Validadores::ValidarEnum($parametros["sector"], SectoresEnum::class)) {
             $producto = Producto::ObtenerPorID($parametros["id"], true);
             if ($producto) {
                 $producto -> tipo = $parametros["tipo"];
@@ -90,7 +90,7 @@ class ProductoController implements IApiUsable {
                 $payload = json_encode(array("ERROR" => "No se pudo encontrar el producto para realizar la modificación"));
             }
         } else {
-            $payload = json_encode(array("ERROR" => "Los parámetros 'id', 'tipo', 'sector' y 'precio' son obligatorios para modificar un producto"));
+            $payload = json_encode(array("ERROR" => "Los parámetros 'id', 'tipo' (comida/bebida), 'sector' (cocina/candyBar/barraChoperas/barraTragos) y 'precio' son obligatorios para modificar un producto"));
         }
         
         $response -> getBody() -> write($payload);
@@ -119,11 +119,13 @@ class ProductoController implements IApiUsable {
         $archivosCargados = $request -> getUploadedFiles();
         $archivo = $archivosCargados["listaProductos"];
         $payload = json_encode(array("ERROR" => "Hubo un error en la carga del archivo CSV de productos"));
+
         if ($archivo -> getError() === UPLOAD_ERR_OK) {
             if (Producto::CargarDesdeCSV($archivo -> getFilePath())) {
                 $payload = json_encode(array("Resultado" => "El archivo de productos ha sido cargado con éxito en la base de datos"));
             };
         }
+        
         $response -> getBody() -> write($payload);
         return $response->withHeader('Content-Type', 'application/json');
     }

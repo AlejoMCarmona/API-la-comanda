@@ -50,7 +50,7 @@ $app -> group('/usuarios', function (RouteCollectorProxy $group) {
     $group -> get('/puesto/{puesto}', \UsuarioController::class . ':TraerPorPuesto');
     $group -> delete('/{dni}', \UsuarioController::class . ':BorrarUno');
     $group -> put('[/]', \UsuarioController::class . ':ModificarUno');
-}) -> add(new AuthMiddleware(["socio"]));
+}) -> add(new AuthMiddleware(["socio"])); // Las operaciones que tienen que ver con la información de los empleados y sus correos, solo deben ser vista por los socios
 #endregion
 #region Productos
 $app -> group('/productos', function (RouteCollectorProxy $group) {

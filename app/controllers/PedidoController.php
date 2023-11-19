@@ -12,9 +12,9 @@ class PedidoController implements IApiUsable {
         if (Validadores::ValidarParametros($parametros, [ "codigoMesa", "idProducto", "nombreCliente" ])) {
             $mesa = Mesa::ObtenerPorCodigoIdentificacion($parametros["codigoMesa"], true);
             $producto = Producto::ObtenerPorID($parametros["idProducto"], true);
-            if ($mesa && $producto) {
+            if ($mesa && $producto) { // Si la mesa y el producto existen
                 $codigoIdentificacion = "";
-                if ($mesa -> estado != "cerrada") {
+                if ($mesa -> estado != "cerrada") { // Si la mesa ya está siendo ocupada
                     $codigoIdentificacion = Pedido::ObtenerUltimoPedidoPorMesa($parametros['codigoMesa']) -> codigoIdentificacion;
                 } else {
                     $codigoIdentificacion = Validadores::GenerarNumeroAlfanumericoIdentificacion(5, "Pedido");
@@ -22,7 +22,7 @@ class PedidoController implements IApiUsable {
 
                 $pedido = new Pedido($parametros['codigoMesa'], $parametros['idProducto'], $parametros["nombreCliente"], $codigoIdentificacion);
                 $resultado = $pedido -> CrearPedido();
-                $mesa -> CambiarEstado("con cliente esperando pedido");
+                $mesa -> CambiarEstado("con cliente esperando pedido"); // Cambio el estado de la mesa a 'con cliente esperando pedido'
 
                 if (is_string($resultado)) {
                     $payload = json_encode(array("Resultado" => "Se ha creado un pedido con el número de identificación {$resultado}"));
@@ -54,8 +54,6 @@ class PedidoController implements IApiUsable {
     }
 
     public function TraerPorCodigoIdentificacion($request, $response, $args) {
-        $parametros = $request -> getParsedBody();
-
         if (Validadores::ValidarParametros($args, [ "codigoIdentificacion" ])) {
             $lista = Pedido::ObtenerPorCodigoIdentificacion($args["codigoIdentificacion"], true);
 
@@ -70,50 +68,6 @@ class PedidoController implements IApiUsable {
 
         $response -> getBody() -> write($payload);
         return $response->withHeader('Content-Type', 'application/json');
-    }
-
-    public function TraerTiempoEstimadoPedido($request, $response, $args) {
-        if (Validadores::ValidarParametros($args, [ "codigoMesa", "id" ])) {
-            $tiempo = Pedido::ObtenerTiempoRestantePorIdPedido($args["codigoMesa"], $args["idPedido"]);
-
-            if (is_numeric($tiempo)) {
-                $mensaje = "Faltan {$tiempo} minutos para tener tu pedido";
-                if ($tiempo < 0) {
-                    $tiempo *= -1; 
-                    $mensaje = "Tu pedido se encuentra retrasado {$tiempo} minutos";
-                }
-                $payload = json_encode(array("Resultado" => $mensaje ));
-            } else {
-                $payload = json_encode(array("ERROR" => "No se pudo obtener el tiempo restante para la entrega del pedido"));
-            }
-        } else {
-            $payload = json_encode(array("ERROR" => "Los parámetros 'codigoMesa' y 'idPedido' son obligatorios para traer el tiempo de pedido"));
-        }
-
-        $response -> getBody() -> write($payload);
-        return $response -> withHeader('Content-Type', 'application/json');
-    }
-
-    public function TraerTiempoEstimadoPedidoCompleto($request, $response, $args) {
-        if (Validadores::ValidarParametros($args, [ "codigoMesa", "codigoIdentificacion" ])) {
-            $tiempo = Pedido::ObtenerTiempoRestantePorCodigoIdentificacion($args["codigoMesa"], $args["codigoIdentificacion"]);
-
-            if (is_numeric($tiempo)) {
-                $mensaje = "Faltan {$tiempo} minutos para tener tu pedido";
-                if ($tiempo < 0) {
-                    $tiempo *= -1; 
-                    $mensaje = "Tu pedido se encuentra retrasado {$tiempo} minutos";
-                }
-                $payload = json_encode(array("Resultado" => $mensaje ));
-            } else {
-                $payload = json_encode(array("ERROR" => "No se pudo obtener el tiempo restante para la entrega del pedido"));
-            }
-        } else {
-            $payload = json_encode(array("ERROR" => "Los parámetros 'codigoMesa' y 'idPedido' son obligatorios para traer el tiempo de pedido"));
-        }
-
-        $response -> getBody() -> write($payload);
-        return $response -> withHeader('Content-Type', 'application/json');
     }
 
     public function TraerTiempoRestante($request, $response, $args) {
@@ -134,7 +88,7 @@ class PedidoController implements IApiUsable {
 
     public function TraerPedidosPendientesPorSector($request, $response, $args) {
         if (Validadores::ValidarParametros($args, [ "sector" ])) {
-            $lista = Pedido::ObtenerPedidosPorSector($args["sector"]); // Trae solo los pedidos pendientes de ese sector
+            $lista = Pedido::ObtenerPedidosPorSector($args["sector"]);
 
             if (is_array($lista)) {
                 $payload = json_encode(array("Lista" => $lista));
@@ -215,7 +169,7 @@ class PedidoController implements IApiUsable {
         $parametros = $request -> getParsedBody ();
 
         if (Validadores::ValidarParametros($args, ["id"])) {
-            $payload = json_encode(array("ERROR" => "Hubo un error al cambiar el estado"));
+            $payload = json_encode(array("ERROR" => "Hubo un error al intentar borrar un pedido"));
             $pedido = Pedido::ObtenerPorID($args["id"], true);
             if ($pedido) {
                 $nuevoEstado = "cancelado";
@@ -226,7 +180,7 @@ class PedidoController implements IApiUsable {
             $payload = json_encode(array("ERROR" => "El pedido con el id {$args["id"]} no existe o ya fue cancelado"));
             }
         } else {
-            $payload = json_encode(array("ERROR" => "El parámetro 'sector' es obligatorio para traer los pedidos por sector. Si el pedido se pasa a 'en preparacion', también debe pasarse 'tiempoPreparacion'"));
+            $payload = json_encode(array("ERROR" => "El parámetro 'id' es obligatorio para borrar un pedido."));
         }
         
         $response -> getBody() -> write($payload);
@@ -258,6 +212,7 @@ class PedidoController implements IApiUsable {
         return $response->withHeader('Content-Type', 'application/json');
     }
 
+    // TODO: probar
     public function SubirFotoMesa($request, $response, $args) {
         $parametros = $request -> getParsedBody();
         $fotoMesa = $request -> getUploadedFiles()['foto'];
@@ -265,21 +220,9 @@ class PedidoController implements IApiUsable {
         if (Validadores::ValidarParametros($parametros, [ "codigoIdentificacion" ]) && $fotoMesa -> getError() === UPLOAD_ERR_OK) {
             $codigoIdentificacion = $parametros["codigoIdentificacion"];
             $pedidos = Pedido::ObtenerPorCodigoIdentificacion($codigoIdentificacion);
-
             if ($pedidos && count($pedidos) > 0) {
-                $ruta = './fotos/pedidosDeMesas';
-                if (!file_exists($ruta)) {
-                    if (!file_exists('./fotos')) {
-                        mkdir('./fotos', 0777);
-                    }
-                    mkdir($ruta, 0777);
-                }
-    
-                $extension = pathinfo($fotoMesa -> getClientFilename(), PATHINFO_EXTENSION);
-                $nombreFoto = $codigoIdentificacion . date("Ymd") . '.' . $extension;
-                $rutaCompleta = $ruta . '/' . $nombreFoto;
-                if (!file_exists($rutaCompleta)) {
-                    $fotoMesa -> moveTo($rutaCompleta);
+                $resultado = Pedido::SubirFotoMesa($fotoMesa, $codigoIdentificacion);
+                if ($resultado) {
                     $payload = json_encode(array("Resultado" => "La foto de la mesa para el pedido {$codigoIdentificacion} se ha subido correctamente"));
                 } else {
                     $payload = json_encode(array("ERROR" => "Ya se ha subido una foto para el pedido de esta mesa"));
@@ -287,7 +230,6 @@ class PedidoController implements IApiUsable {
             } else {
                 $payload = json_encode(array("ERROR" => "No existe un pedido con el código de identificación {$codigoIdentificacion}"));
             }
-
         } else {
             $payload = json_encode(array("ERROR" => "El parámetro 'codigoIdentificacion' y una foto son obligatorios para cargar la foto de la mesa"));
         }

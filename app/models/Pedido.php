@@ -65,7 +65,6 @@ class Pedido {
         return $retorno;
     }
 
-
     public static function ObtenerTodosLosPedidos($soloActivos = false) {
         $retorno = false;
         $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
@@ -251,6 +250,28 @@ class Pedido {
             $retorno = $consulta -> fetchObject();
             $retorno = (float)$retorno -> precioFinal;
         }
+        return $retorno;
+    }
+
+    public static function SubirFotoMesa($fotoMesa, $codigoIdentificacion) {
+        $retorno = false;
+        $ruta = './fotos/pedidosDeMesas';
+        if (!file_exists($ruta)) {
+            if (!file_exists('./fotos')) {
+                mkdir('./fotos', 0777);
+            }
+            mkdir($ruta, 0777);
+        }
+
+        $extension = pathinfo($fotoMesa -> getClientFilename(), PATHINFO_EXTENSION);
+        $nombreFoto = $codigoIdentificacion . date("Ymd") . '.' . $extension;
+        $rutaCompleta = $ruta . '/' . $nombreFoto;
+
+        if (!file_exists($rutaCompleta)) {
+            $fotoMesa -> moveTo($rutaCompleta);
+            $retorno = true;
+        }
+
         return $retorno;
     }
 }
