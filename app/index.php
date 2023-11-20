@@ -79,7 +79,6 @@ $app -> group('/pedidos', function (RouteCollectorProxy $group) {
 #endregion
 #region Encuestas
 $app -> group('/encuestas', function (RouteCollectorProxy $group) {
-    $group -> get('[/]', \EncuestaController::class . ':TraerTodos');
     $group -> post('[/]', \EncuestaController::class . ':CargarUno');
 });
 #endregion

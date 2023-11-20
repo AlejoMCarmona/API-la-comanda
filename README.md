@@ -6,6 +6,15 @@
 
 <hr>
 
+**NOTA 1**: Esta aplicación viene con las tablas en SQL cargadas para poder probar su funcionamiento: 
+- Productos: Viene con 14 productos.
+- Usuarios: Viene con los 3 socios del restaurante y 5 empleados.
+- Mesas: Viene con 5 mesas cargadas.
+- Pedidos: Viene con 2 pedidos hechos en una mesa, ya finalizados.
+- Encuesta: Viene con una encuesta realizada acerca del pedido mencionado.
+
+**NOTA 2:** También es **importante saber** que se ha modificado la hora de PHP y la hora de MySQL para que ambas funcionen en UTC +0. De no tenerse esto en cuenta, la función de "Obtener tiempo restante para un pedido" no funcionaría correctamente.
+
 ## Objetivo
 
 El objetivo de esta API desarrollada para un restaurante, es tomar los pedidos realizados y hacer de comanda, permitiendo que los empleados accedan a los mismos para poder cumplir con su labor según su puesto.
@@ -372,7 +381,7 @@ Los cocineros, bartenders y cerveceros tienen la habilidad de cambiar el estado 
 - pendiente: el estado ha sido enviado al sector para ser preparado pero aún no se ha comenzado con el proceso.
 - en preparación: el pedido ha comenzado a ser preparado por un empleado, este le ha asignado un tiempo aproximado de preparacíon que es el que se utilizará si un usuario desea conocer el tiempo restante de preparación del pedido. 
 - listo para servir: la preparación del producto ha finalizado y puede ser entregado
-- entregado: el producto ha sido entregado a la mesa.
+- entregado: el producto ha sido entregado a la mesa. Esta acción es realizada por los empleados que trabajan preparando los productos de los pedidos para que el mozo no tenga la responsabilidad de marcar a los mismos como "entregado". De esta manera se evita malentendidos entre estos empleados y los mozos, entendiendo que un plato es "entregado" una vez que los cocineros/cerveceros/bartenders observan que el pedido ha salido de su puesto.
 
 Ruta: http://localhost:3000/pedidos/cambioEstado</br>
 Método HTTP: POST</br>

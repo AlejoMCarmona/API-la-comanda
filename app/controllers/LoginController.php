@@ -17,6 +17,8 @@ class LoginController {
             } else {
                 $payload = json_encode(array("ERROR" => $resultado["mensaje"]));
             }
+        } else {
+            $payload = json_encode(array("ERROR" => "Los paramétros 'email' y 'clave' son obligatorios para iniciar sesion"));
         }
 
         $response -> getBody() -> write($payload);

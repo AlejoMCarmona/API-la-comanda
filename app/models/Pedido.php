@@ -211,11 +211,11 @@ class Pedido {
         $objetoAccesoDatos = AccesoDatos::ObtenerInstancia();
         $query = "";
         if ($soloPendientes) {
-            $query = "SELECT pe.codigoMesa AS mesa, pr.nombre AS nombreProducto, pe.fecha AS fechaPedido FROM pedidos AS pe INNER JOIN productos AS pr ON pe.idProducto = pr.id WHERE pr.sector = :sector AND pe.estado = 'pendiente'";
+            $query = "SELECT pe.id AS idPedido, pe.codigoMesa AS mesa, pr.nombre AS nombreProducto, pe.fecha AS fechaPedido FROM pedidos AS pe INNER JOIN productos AS pr ON pe.idProducto = pr.id WHERE pr.sector = :sector AND pe.estado = 'pendiente'";
         } else if ($soloActivos) {
-            $query = "SELECT pe.codigoMesa AS mesa, pr.nombre AS nombreProducto, pe.fecha AS fechaPedido FROM pedidos AS pe INNER JOIN productos AS pr ON pe.idProducto = pr.id WHERE pr.sector = :sector AND pe.estado <> 'cancelado'";
+            $query = "SELECT pe.id AS idPedido, pe.codigoMesa AS mesa, pr.nombre AS nombreProducto, pe.fecha AS fechaPedido FROM pedidos AS pe INNER JOIN productos AS pr ON pe.idProducto = pr.id WHERE pr.sector = :sector AND pe.estado <> 'cancelado'";
         } else {
-            $query = "SELECT pe.codigoMesa AS mesa, pr.nombre AS nombreProducto, pe.fecha AS fechaPedido FROM pedidos AS pe INNER JOIN productos AS pr ON pe.idProducto = pr.id WHERE pr.sector = :sector";
+            $query = "SELECT pe.id AS idPedido, pe.codigoMesa AS mesa, pr.nombre AS nombreProducto, pe.fecha AS fechaPedido FROM pedidos AS pe INNER JOIN productos AS pr ON pe.idProducto = pr.id WHERE pr.sector = :sector";
         }
         $consulta = $objetoAccesoDatos -> PrepararConsulta($query);
         $consulta -> bindParam(':sector', $sector);
