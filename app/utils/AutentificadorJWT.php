@@ -4,7 +4,7 @@ use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 
 class AutentificadorJWT {
-    private static $claveSecreta = ''; // TODO: reemplazar con clave secreta
+    private static $claveSecreta = 'h$fiO$fQ';
     private static $tipoEncriptacion = 'HS256';
 
     public static function CrearToken($datos) {

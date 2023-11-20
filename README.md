@@ -4,9 +4,6 @@
 - División: 3D.
 - Año: 2023.
 
-#### ATENCIÓN:
-Para poder utilizar la aplicación e iniciar sesión como empleado, se debe proporcionar una clave secreta en la clase "AutentificadorJWT".
-
 <hr>
 
 ## Objetivo
@@ -30,7 +27,7 @@ La entidad "Usuario" representa a cada uno de los empleados del restaurante. Los
 - Bartender
 - Cervecero
 - Mozo
-- Socio (pueden haber como máximo 3 en el restaurante)
+- Socio
 
 Las operaciones relacionadas con el manejo de usuarios están bajo ruteadas bajo la URL: http://localhost:3000/usuarios
 
@@ -162,10 +159,10 @@ Para borrar una mesa, es necesario proporcionar a través de la URL el código a
 
 Ruta: http://localhost:3000/mesas/cambioEstado</br>
 Método HTTP: POST</br>
-Puestos autorizados: Socios, cocineros, bartenders, cerveceros.
+Puestos autorizados: Socios, mozos.
 
 Para cambiar el estado de una mesa, es necesario proporcionar su código de alfanumérico de 5 digitos a través del body:
-- codigoMesa
+- codigoIdentificacion
 
 Los cambios de estado se manejan de la siguiente manera:
 - 'cerrada' -> 'con cliente esperando pedido': Es automático. Se realiza cuando se toma el primer pedido para la mesa.
@@ -185,7 +182,7 @@ Para obtener todas las mesas, simplemente se debe llamar a la URL proporcionada.
 
 ### Obtener una mesa
 
-Ruta: http://localhost:3000/mesas/{codigoMesa}</br>
+Ruta: http://localhost:3000/mesas/{codigoIdentificacion}</br>
 Método HTTP: GET</br>
 Puestos autorizados: Socios, bartenders, cerveceros, cocineros, mozos.
 
@@ -260,7 +257,7 @@ Si por algún motivo se desea descargar todos los productos, la plataforma propo
 
 Ruta: http://localhost:3000/productos/csv</br>
 Método HTTP: GET</br>
-Puestos autorizados: Socios.
+Puestos autorizados: No hay restricción.
 
 Al llamar a esta URL, se le descargá al usuario un CSV con el listado de los productos, tal cual como se encuentran en la base de datos.
 
@@ -308,7 +305,7 @@ Si el código de la mesa proporcionado está activo y el producto solicitado tam
 
 Ruta: http://localhost:3000/pedidos</br>
 Método HTTP: PUT</br>
-Puestos autorizados: Socios, mozos.
+Puestos autorizados: Mozos.
 
 Para modificar un pedido, es necesario proporcionar a través del body los siguientes parámetros:
 - id
@@ -321,15 +318,15 @@ El ID del producto debe existir para poder modificar el producto.
 
 Ruta: http://localhost:3000/pedidos/{id}</br>
 Método HTTP: DELETE</br>
-Puestos autorizados: Socios, mozos.
+Puestos autorizados: Mozos.
 
 Para eliminar un pedido, es necesario proporcionar a través de la URL el id del pedido a eliminar. Se hará una baja lógica.
 
 ### Obtener un pedido
 
-Ruta: http://localhost:3000/pedidos/{id}</br>
+Ruta: http://localhost:3000/pedidos/pedido/{id}</br>
 Método HTTP: GET</br>
-Puestos autorizados: Socios, cocineros, cerveceros y bartenders
+Puestos autorizados: Socios, cocineros, cerveceros, bartenders, mozos.
 
 Para obtener un pedido, es necesario proporcionar a través de la URL el id del pedido buscado.
 
@@ -383,7 +380,7 @@ Puestos autorizados: Cocineros, cerveceros, bartenders.
 
 Para poder cambiar el estado de un pedido, se deben proporcionar los siguientes parámetros a través del body:
 - id
-- tiempoPreparacion
+- tiempoPreparacion: el tiempo que tarda el pedido en prepararse expresado en segundos.
 
 ### Subir foto de una mesa
 
@@ -391,33 +388,11 @@ El mozo tiene la posibilidad de subir una foto de una mesa con sus integrantes p
 
 Ruta: http://localhost:3000/pedidos/foto</br>
 Método HTTP: POST</br>
-Puestos autorizados: Socios y mozos
+Puestos autorizados: Mozos.
 
 Para poder subir la foto de una mesa, se deben proporcionar los siguientes parámetros a través del body:
 - foto: foto de la mesa.
 - codigoIdentificacion: codigo alfanumérico de 5 dígitos que identifica a los pedidos de una mesa.
-
-## Encuesta
-
-Esta entidad sirve para representar a las encuentas realizadas por los clientes sobre su atención en el restaurante. La misma se habilita una vez que el cliente terminó de pagar, esto quiere decir que la mesa asociada a la misma debe estar con el estado 'con cliente pagando'.
-
-### Operaciones
-
-### Crear nueva encuesta
-
-El usuario tiene la posibilidad de evaluar la atención recibida en varios puntos. La creación de la encuesta es posible una vez que el cliente terminó de comer. Se pueden realizar muchas reseñas para un mismo pedido, puesto que los comensales pueden ser varios.
-
-Ruta: http://localhost:3000/encuestas</br>
-Método HTTP: POST</br>
-Puestos autorizados: No hay restricción.
-
-Para poder crear la encuesta, se deben proporcionar los siguientes parámetros a través del body:
-- codigoPedido: codigo alfanumérico de 5 dígitos que identifica a todos los pedidos realizados en esa mesa.
-- puntuacionMesa
-- puntuacionRestaurante
-- puntuacionMozo
-- puntuacionCocinero
-- descripcionExperiencia: una breve descripción de unos 66 caractéres como máximo acerca de la atención recibida.
 
 ## Login
 
@@ -436,6 +411,29 @@ Para poder iniciar sesión, se deben proporcionar los siguientes parámetros a t
 - clave
 
 Se le notificará al usuario si el email no existe, si la contraseña es incorrecta, o se le devolverá el token JWT generado si se udo realizar el inicio de sesión correctamente.
+
+## Encuesta
+
+Esta entidad sirve para representar a las encuentas realizadas por los clientes sobre su atención en el restaurante. La misma se habilita una vez que el cliente terminó de pagar, esto quiere decir que la mesa asociada a la misma debe estar con el estado 'con cliente pagando'.
+NOTA: Esta entidad no era necesaria al momento del tercer sprint, pero decidí agregarla con su mínima funcionalidad (crear una encuesta) con el objetivo de finalizar con el ciclo completo de un pedido. 
+
+### Operaciones
+
+### Crear nueva encuesta
+
+El usuario tiene la posibilidad de evaluar la atención recibida en varios puntos. La creación de la encuesta es posible una vez que el cliente terminó de comer. Se pueden realizar muchas reseñas para un mismo pedido, puesto que los comensales pueden ser varios.
+
+Ruta: http://localhost:3000/encuestas</br>
+Método HTTP: POST</br>
+Puestos autorizados: No hay restricción.
+
+Para poder crear la encuesta, se deben proporcionar los siguientes parámetros a través del body:
+- codigoPedido: codigo alfanumérico de 5 dígitos que identifica a todos los pedidos realizados en esa mesa.
+- puntuacionMesa
+- puntuacionRestaurante
+- puntuacionMozo
+- puntuacionCocinero
+- descripcionExperiencia: una breve descripción de unos 66 caractéres como máximo acerca de la atención recibida.
 
 ## Flujo de los pedidos
 

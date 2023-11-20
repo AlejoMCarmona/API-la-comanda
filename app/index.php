@@ -37,7 +37,7 @@ $app -> group('/mesas', function (RouteCollectorProxy $group) {
     $group -> post('[/]', \MesaController::class . ':CargarUno') -> add(new AuthMiddleware(["socio"]));
     $group -> post('/cambioEstado', \MesaController::class . ':CambiarEstado') -> add(new AuthMiddleware(["socio","mozo"]));
     $group -> get('[/]', \MesaController::class . ':TraerTodos') -> add(new AuthMiddleware(["socio", "bartender", "cervecero", "mozo", "cocinero"]));
-    $group -> get('/{codigoMesa}', \MesaController::class . ':TraerUno') -> add(new AuthMiddleware(["socio", "bartender", "cervecero", "mozo", "cocinero"]));
+    $group -> get('/{codigoIdentificacion}', \MesaController::class . ':TraerUno') -> add(new AuthMiddleware(["socio", "bartender", "cervecero", "mozo", "cocinero"]));
     $group -> delete('/{codigoIdentificacion}', \MesaController::class . ':BorrarUno') -> add(new AuthMiddleware(["socio"]));
     $group -> put('[/]', \MesaController::class . ':ModificarUno') -> add(new AuthMiddleware(["socio"]));
 });
@@ -50,7 +50,7 @@ $app -> group('/usuarios', function (RouteCollectorProxy $group) {
     $group -> get('/puesto/{puesto}', \UsuarioController::class . ':TraerPorPuesto');
     $group -> delete('/{dni}', \UsuarioController::class . ':BorrarUno');
     $group -> put('[/]', \UsuarioController::class . ':ModificarUno');
-}) -> add(new AuthMiddleware(["socio"])); // Las operaciones que tienen que ver con la información de los empleados y sus correos, solo deben ser vista por los socios
+}) -> add(new AuthMiddleware(["socio"])); // Las operaciones que tienen que ver con la información de los empleados y sus correos, solo deben ser vista por los socios, puesto que contiene información del personal
 #endregion
 #region Productos
 $app -> group('/productos', function (RouteCollectorProxy $group) {
@@ -66,15 +66,15 @@ $app -> group('/productos', function (RouteCollectorProxy $group) {
 #region Pedidos
 $app -> group('/pedidos', function (RouteCollectorProxy $group) {
     $group -> get('[/]', \PedidoController::class . ':TraerTodos') -> add(new AuthMiddleware(["socio"]));
-    $group -> get('/pedido/{id}', \PedidoController::class . ':TraerUno') -> add(new AuthMiddleware(["socio","cocinero","cervecero","bartender"]));
-    $group -> get('/{codigoIdentificacion}', \PedidoController::class . ':TraerPorCodigoIdentificacion'); // El usuario debería poder ver todos los pedidos de su mesa
+    $group -> get('/pedido/{id}', \PedidoController::class . ':TraerUno') -> add(new AuthMiddleware(["mozo","socio","cocinero","cervecero","bartender"]));
+    $group -> get('/{codigoIdentificacion}', \PedidoController::class . ':TraerPorCodigoIdentificacion'); // El usuario debería poder ver todos los pedidos de su mesa, por eso no hay restricciones. Lo mismo aplica para el tiempo restante.
     $group -> get('/tiempoRestante/{codigoMesa}/{codigoIdentificacion}', \PedidoController::class . ':TraerTiempoRestante');
-    $group -> get('/sector/{sector}', \PedidoController::class . ':TraerPedidosPendientesPorSector') -> add(new AuthMiddleware(["socio","cocinero","cervecero","bartender","mozo"]));
+    $group -> get('/sector/{sector}', \PedidoController::class . ':TraerPedidosPendientesPorSector') -> add(new AuthMiddleware(["mozo","socio","cocinero","cervecero","bartender"]));
     $group -> post('[/]', \PedidoController::class . ':CargarUno') -> add(new AuthMiddleware(["mozo"]));
     $group -> post('/cambioEstado', \PedidoController::class . ':CambiarEstado') -> add(new AuthMiddleware(["cocinero","cervecero","bartender"]));
     $group -> post('/foto', \PedidoController::class . ':SubirFotoMesa') -> add(new AuthMiddleware(["mozo"]));
-    $group -> put('[/]', \PedidoController::class . ':ModificarUno') -> add(new AuthMiddleware(["mozo","socio"]));
-    $group -> delete('/{id}', \PedidoController::class . ':BorrarUno') -> add(new AuthMiddleware(["mozo","socio"]));
+    $group -> put('[/]', \PedidoController::class . ':ModificarUno') -> add(new AuthMiddleware(["mozo"]));
+    $group -> delete('/{id}', \PedidoController::class . ':BorrarUno') -> add(new AuthMiddleware(["mozo"]));
 });
 #endregion
 #region Encuestas

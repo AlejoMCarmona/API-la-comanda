@@ -25,17 +25,8 @@ class UsuarioController implements IApiUsable {
                         $usuario = new Usuario($parametros['nombre'], $parametros['apellido'], $parametros['dni'], $parametros['email'], $parametros['clave'], $parametros['puesto'], $parametros['sector']);
                         $resultado = $usuario -> CrearUsuario();
                     }
-                } else if ($parametros["puesto"] == 'socio') {
-                    // Si el nuevo usuario es un socio
-                    $sociosActuales = Usuario::ObtenerUsuariosPorPuesto("socio", true);
-                    if ($sociosActuales && count($sociosActuales) == 3) {
-                        $payload = json_encode(array("ERROR" => "Solo pueden haber 3 socios como máximo"));
-                    } else {
-                        $usuario = new Usuario($parametros['nombre'], $parametros['apellido'], $parametros['dni'], $parametros['email'], $parametros['clave'], $parametros['puesto']);
-                        $resultado = $usuario -> CrearUsuario();
-                    }
                 } else {
-                    // Si el nuevo usuario es un mozo
+                    // Si el nuevo usuario es un mozo o un socio
                     $usuario = new Usuario($parametros['nombre'], $parametros['apellido'], $parametros['dni'], $parametros['email'], $parametros['clave'], $parametros['puesto']);
                     $resultado = $usuario -> CrearUsuario();
                 }
@@ -75,7 +66,7 @@ class UsuarioController implements IApiUsable {
             if (is_array($lista)) {
                 $payload = json_encode(array("Lista" => $lista));
             } else {
-                $payload = json_encode(array("ERROR" => "Hubo un error al obtener todos los usuarios"));
+                $payload = json_encode(array("ERROR" => "No se encontraron usuarios con ese puesto"));
             }
         } else {
             $payload = json_encode(array("ERROR" => "El parámetro 'puesto' (cocinero/mozo/bartender/cervecero/socio) es obligatorio para traer a los empleados por puesto"));

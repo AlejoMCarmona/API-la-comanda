@@ -41,16 +41,16 @@ class MesaController implements IApiUsable {
     }
 
     public function TraerUno($request, $response, $args) {
-        if (Validadores::ValidarParametros($args, [ "codigoMesa" ])) {
-            $mesa = Mesa::ObtenerPorCodigoIdentificacion($args["codigoMesa"], true);
+        if (Validadores::ValidarParametros($args, [ "codigoIdentificacion" ])) {
+            $mesa = Mesa::ObtenerPorCodigoIdentificacion($args["codigoIdentificacion"], true);
 
             if ($mesa) {
                 $payload = json_encode(array("Mesa" => $mesa));
             } else {
-                $payload = json_encode(array("ERROR" => "No se pudo encontrar una mesa con el código {$args["codigoMesa"]}"));
+                $payload = json_encode(array("ERROR" => "No se pudo encontrar una mesa con el código {$args["codigoIdentificacion"]}"));
             }
         } else {
-            $payload = json_encode(array("ERROR" => "El parámetro 'codigoMesa' es obligatorio para obtener una mesa"));
+            $payload = json_encode(array("ERROR" => "El parámetro 'codigoIdentificacion' es obligatorio para obtener una mesa"));
         }
 
         $response -> getBody() -> write($payload);
@@ -60,15 +60,15 @@ class MesaController implements IApiUsable {
     public function CambiarEstado($request, $response, $args) {
         $parametros = $request -> getParsedBody();
 
-        if (Validadores::ValidarParametros($parametros, [ "codigoMesa" ])) {
-            $mesa = Mesa::ObtenerPorCodigoIdentificacion($parametros["codigoMesa"], true);
+        if (Validadores::ValidarParametros($parametros, [ "codigoIdentificacion" ])) {
+            $mesa = Mesa::ObtenerPorCodigoIdentificacion($parametros["codigoIdentificacion"], true);
             if ($mesa) {
                 $nuevoEstado = false;
                 switch($mesa -> estado) {
                     // El estado: 'con cliente esperando pedido' se asigna al momento de crear pedidos para la mesa
                     // El estado: 'con cliente comiendo' se asigna al entregar pedidos en la mesa
                     case 'con cliente comiendo':
-                        $codigoPedido = (Pedido::ObtenerUltimoPedidoPorMesa($parametros["codigoMesa"])) -> codigoIdentificacion;
+                        $codigoPedido = (Pedido::ObtenerUltimoPedidoPorMesa($parametros["codigoIdentificacion"])) -> codigoIdentificacion;
                         $pedidos = Pedido::ObtenerPorCodigoIdentificacion($codigoPedido, true);
                         // Verifico que todos los pedidos tengan el estado 'entregado'
                         $todosEntregados = array_reduce(array_column($pedidos, "estado"), function ($carry, $estado) { return $carry && $estado === "entregado"; }, true);
@@ -92,17 +92,17 @@ class MesaController implements IApiUsable {
 
                 if ($nuevoEstado) { // Si se tiene un nuevo estado, entonces cambio el estado de la mesa
                     $mesa -> CambiarEstado($nuevoEstado);
-                    $payload = array("Resultado" => "La mesa con código {$parametros["codigoMesa"]} ahora tiene el estado '{$nuevoEstado}'");
+                    $payload = array("Resultado" => "La mesa con código {$parametros["codigoIdentificacion"]} ahora tiene el estado '{$nuevoEstado}'");
                     if ($nuevoEstado == 'con cliente pagando') $payload["Resultado"] = $payload["Resultado"] . '. El cliente debe pagar un total de ' . $precioFinal . '$';
                     $payload = json_encode($payload);
                 } else {
                     $payload = json_encode(array("ERROR" => "Hubo un error en el cambio del estado"));
                 }
             } else {
-                $payload = json_encode(array("ERROR" => "No se pudo encontrar una mesa con el código {$parametros["codigoMesa"]}"));
+                $payload = json_encode(array("ERROR" => "No se pudo encontrar una mesa con el código {$parametros["codigoIdentificacion"]}"));
             }
         } else {
-            $payload = json_encode(array("ERROR" => "El parámetro 'codigoMesa' es obligatorio para modificar el estado de una mesa"));
+            $payload = json_encode(array("ERROR" => "El parámetro 'codigoIdentificacion' es obligatorio para modificar el estado de una mesa"));
         }
 
         $response -> getBody() -> write($payload);
