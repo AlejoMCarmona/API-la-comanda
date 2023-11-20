@@ -38,6 +38,18 @@ La entidad "Usuario" representa a cada uno de los empleados del restaurante. Los
 - Mozo
 - Socio
 
+Su estructura completa es la siguiente:
+- id
+- nombre
+- apellido
+- dni
+- puesto (cocinero/cervecero/bartender/mozo/socio)
+- sector (cocina/barraChoperas/barraTragos/candyBar)
+- fechaAlta
+- email
+- clave
+- activo: 'true' por defecto
+
 Las operaciones relacionadas con el manejo de usuarios están bajo ruteadas bajo la URL: http://localhost:3000/usuarios
 
 ### Operaciones
@@ -131,7 +143,7 @@ La mesa cuenta con un código de identificación alfanumérico de 5 dígitos que
 - asientos
 - codigoIdentificacion: creado automáticamente por la aplicación de manera unívoca.
 - activa: 'true' por defecto
-- fechaCreacion	
+- fechaCreacion
 
 Las operaciones relacionadas con el manejo de mesas están bajo ruteadas bajo la URL: http://localhost:3000/mesas
 
@@ -201,10 +213,10 @@ Para obtener traer una mesa, es necesario proporcionar a través de la URL el c�
 
 La entidad 'Producto' representa a cada uno de los productos del restaurante. Su estructura completa es la siguiente:
 - id
-- nombre	
-- tipo: comida o bebida	
+- nombre
+- tipo: comida o bebida
 - sector: cocina, candyBar, barraTragos o barraChoperas.
-- precio	
+- precio
 - activo: 'true' por defecto
 - fechaIncorporacion
 
@@ -426,7 +438,15 @@ Se le notificará al usuario si el email no existe, si la contraseña es incorre
 ## Encuesta
 
 Esta entidad sirve para representar a las encuentas realizadas por los clientes sobre su atención en el restaurante. La misma se habilita una vez que el cliente terminó de pagar, esto quiere decir que la mesa asociada a la misma debe estar con el estado 'con cliente pagando'.
-NOTA: Esta entidad no era necesaria al momento del tercer sprint, pero decidí agregarla con su mínima funcionalidad (crear una encuesta) con el objetivo de finalizar con el ciclo completo de un pedido. 
+NOTA: Esta entidad no era necesaria al momento del tercer sprint, pero decidí agregarla con su mínima funcionalidad (crear una encuesta) con el objetivo de finalizar con el ciclo completo de un pedido. Su estructura completa es la siguiente:
+- id
+- codigoPedido
+- puntuacionMesa
+- puntuacionRestaurante
+- puntuacionMozo
+- puntuacionCocinero
+- descripcionExperiencia
+- fecha
 
 ### Operaciones
 
