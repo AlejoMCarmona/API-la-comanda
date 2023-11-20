@@ -325,6 +325,8 @@ El ID del producto debe existir para poder modificar el producto.
 
 ### Eliminar un pedido
 
+La eliminación de un pedido consistirá en cancelar al mismo, por lo que su estado pasará a ser 'cancelado'.
+
 Ruta: http://localhost:3000/pedidos/{id}</br>
 Método HTTP: DELETE</br>
 Puestos autorizados: Mozos.
