@@ -212,7 +212,6 @@ class PedidoController implements IApiUsable {
         return $response->withHeader('Content-Type', 'application/json');
     }
 
-    // TODO: probar
     public function SubirFotoMesa($request, $response, $args) {
         $parametros = $request -> getParsedBody();
         $fotoMesa = $request -> getUploadedFiles()['foto'];
